@@ -215,5 +215,24 @@ void data_blocking(int N,vector<double> simulation_value, double real_value, str
 };
 
 
+void fill_hist(Random& rnd,int it, vector<vector<double>>& h, vector<int> N, string file) {
+
+ int l=0;
+ double sum;
+ for(auto & el : N) {//for each N fill the histograms
+	for (int i=0;i<it;i++) {
+		sum=0;
+		if (file == "hist_stand.txt")
+			for (int j=0; j<el;j++) sum+=rnd.Rannyu();
+		else if (file == "hist_exp.txt")
+			for (int j=0; j<el;j++) sum+=rnd.exponential_dist();
+		else for (int j=0; j<el;j++) sum+=rnd.lorentzian_dist();
+		h[l].push_back(sum/el);
+	}
+ l++;
+ }
+
+ print_matrix(h,file);
 
 
+};

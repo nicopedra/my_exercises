@@ -4,7 +4,7 @@
 #include <cmath>
 #include <vector>
 #include <numeric>
-
+#include <map>
 #ifndef __funz__
 #define __funz__
 
@@ -61,6 +61,7 @@ void data_blocking(int,vector<double>, double, string);//passing the number of b
 						       //the vector conteining the N values calculated in each block,
 						       //the reale value, and the name of the file in which save the results
 
+void fill_hist(Random&,int,vector<vector<double>>&,vector<int>,string);
 
 #endif 
 
