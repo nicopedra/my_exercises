@@ -62,6 +62,9 @@ void data_blocking(int,vector<double>, double, string);//passing the number of b
 						       //the reale value, and the name of the file in which save the results
 
 void fill_hist(Random&,int,vector<vector<double>>&,vector<int>,string);
+//passing the Random generator, the number of iteration, matrix conteining the histograms,
+//the vector which tells how much random number sum in each iteration,
+//file in which save the histogram
 
 #endif 
 
