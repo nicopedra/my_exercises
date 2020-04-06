@@ -65,19 +65,6 @@ void Random :: SetRandom(int * s, int p1, int p2){
   return;
 };
 
-double Random :: exponential_dist(double lambda = 1) { 
-                                                  
-        double y = Rannyu();
-        return -1/lambda*log(1-y);
-};
-
-double Random :: lorentzian_dist(double mu = 0 ,double gamma = 1) {//generate random number with
-                                                          	   //lorentzian distribution
-        double y = Rannyu();
-        return gamma*tan(M_PI*(y-0.5))+mu;
-};
-
-
 Random random_initialization() {
 
    Random rnd;
@@ -145,13 +132,6 @@ void print_matrix(vector<vector<double>> m, string file) {
 	fd.close();
 };
 
-template <typename T>
-double chiquadro(vector<T> observed, double expected) {
-	vector<double> chi_i; 
-	for (auto el : observed) chi_i.push_back((el-expected)*(el-expected)/expected);
-	return accumulate(chi_i.begin(),chi_i.end(),0.);
-};
-
 double genera_angolo_senzaPI (Random rnd) {
 
 	double x=rnd.Rannyu();
@@ -174,7 +154,7 @@ vector<double> esperimento_Buffon(Random rnd,int n,int M, double dist_lines,doub
 
  //using traslational symmetry over x and 
  //periodic symmetry over y (dist_lines) 
- //and symmetry over half circle (generiting angle between -Pi/2 and Pi/2)
+ //and symmetry over half circle (generating angle between -Pi/2 and Pi/2)
  for (int i=0;i<n;i++) {
          for (int j=0;j<M/n;j++) {
                 y=rnd.Rannyu(0.,dist_lines);

@@ -34,10 +34,6 @@ public:
   		 //p(x) = 2*(1-x)
   vector<double> random_direction_3D(double);//create a vector 
  					     //in a random direction in 3D space 
-  double exponential_dist(double);//generate a random number with
-  				  //exponential distribution
-  double lorentzian_dist(double,double);//generate random number with
-  					//lorentzian distribution
    };
 
 Random random_initialization();
@@ -52,15 +48,6 @@ double dev_std_mean(vector<double>);
 void print_vector(vector<double>, string);
 
 void print_matrix(vector<vector<double>>, string);
-
-template <typename T>
-double chiquadro(vector<T> observed, double expected);
-
-double genera_angolo_senzaPI (Random);//generate a uniform angle in [-Pi/2,Pi/2]
-
-vector<double> Buffon(Random,int,int,double,double);//simulate the Buffon experiment:
-                                                    //passing a random generator, number of blocks,
-                                                    //total throws, dist_lines and L_needle  
 
 void data_blocking(int,vector<double>, double, string);//passing the number of blocks N, 
                                                        //the vector conteining the N values calculated in each block,
@@ -77,13 +64,15 @@ vector<double> importance_sampling(Random&,int,int,double);
 
 double importace_sampling_I(Random&,int,double);//returns an integral evaluated with 
 					       //importance sampling method with
-				               //straight line
+				               //straight line distribution
 
 vector<double> RW_cartesian(Random&,vector<double>&,double);//make a discrete RW step
-							    //x,y,z direction or more	
+							    //x,y,z direction (or more dimensions)
+							    //modifies the passed vector	
 
 vector<double> RW_domega(Random&,vector<double>&,double);//make a continuous RW step 
 							 //generic direction in 3D space
+							 //modifies the passed vector
 
 double dist_vect(vector<double>,vector<double>);//return the square distance between two vectors
 						//default: distance between a vector and the origin	

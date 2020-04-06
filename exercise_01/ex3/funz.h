@@ -28,11 +28,6 @@ public:
   double Rannyu(void);
   double Rannyu(double min, double max);
   double Gauss(double mean, double sigma);
-  double exponential_dist(double);//generate random number with
-       			          //exponential distribution	
-  double lorentzian_dist(double,double);//generate random number with
-                                        //lorentzian distribution
-
    };
 
 Random random_initialization();

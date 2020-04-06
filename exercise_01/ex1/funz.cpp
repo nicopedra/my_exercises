@@ -65,20 +65,6 @@ void Random :: SetRandom(int * s, int p1, int p2){
   return;
 };
 
-double Random :: exponential_dist(double lambda = 1) {//generate random number with
-       						      //exponential distribution	
-                                                  
-        double y = Rannyu();
-        return -1/lambda*log(1-y);
-};
-
-double Random :: lorentzian_dist(double mu = 0 ,double gamma = 1) {//generate random number with
-                                                          	   //lorentzian distribution
-        double y = Rannyu();
-        return gamma*tan(M_PI*(y-0.5))+mu;
-};
-
-
 Random random_initialization() {
 
    Random rnd;
@@ -132,62 +118,12 @@ void print_vector(vector<double> v, string file) {
 	fd.close();
 };
 
-void print_matrix(vector<vector<double>> m, string file) {
-	fstream fd;
-	fd.open(file,ios::out);
-	int n_row = m[0].size();
-       	int n_col = m.size();
-	for (int j=0;j<n_row;j++){
-		for (int i=0; i<n_col; i++) {
-			fd << m[i][j] << " ";
-		}
-		fd << endl;
-	}
-	fd.close();
-};
-
 template <typename T>
 double chiquadro(vector<T> observed, double expected) {
 	vector<double> chi_i; 
 	for (auto el : observed) chi_i.push_back((el-expected)*(el-expected)/expected);
 	return accumulate(chi_i.begin(),chi_i.end(),0.);
 };
-
-double genera_angolo_senzaPI (Random rnd) {
-
-	double x=rnd.Rannyu();
-        double y=rnd.Rannyu();
-        double theta;
-	while(x*x+y*y>=1){
-        	x=rnd.Rannyu();
-        	y=rnd.Rannyu();
-	}
-        theta=asin(y/sqrt(x*x+y*y));
-        return theta;
-};
-
-vector<double> esperimento_Buffon(Random rnd,int n,int M, double dist_lines,double L_needle) {
-
- vector<int> N_hit(n,0.);
- vector<int> N_thr(n,M/n);//number of throwns in each block 
- vector<double> pi;
- double y,theta;
-
- //using traslational symmetry over x and 
- //periodic symmetry over y (dist_lines) 
- //and symmetry over half circle (generiting angle between -Pi/2 and Pi/2)
- for (int i=0;i<n;i++) {
-         for (int j=0;j<M/n;j++) {
-                y=rnd.Rannyu(0.,dist_lines);
-                theta=genera_angolo_senzaPI(rnd);
-                //theta=rnd.Rannyu(0.,2*M_PI);
-                if(y+L_needle*sin(theta) > dist_lines || y+L_needle*sin(theta) < 0) N_hit[i]++;
-                }
-	 pi.push_back(2*L_needle*N_thr[i]/(N_hit[i]*dist_lines));//storing a value of pi
-	 							 //for each block
-        }
- return pi;
- };
 
 void data_blocking(int N,vector<double> simulation_value, double real_value, string file) {
  

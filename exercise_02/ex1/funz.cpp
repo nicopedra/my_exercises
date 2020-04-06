@@ -65,17 +65,6 @@ void Random :: SetRandom(int * s, int p1, int p2){
   return;
 };
 
-double Random :: exponential_dist(double lambda = 1) {  
-                                                  
-        double y = Rannyu();
-        return -1/lambda*log(1-y);
-};
-
-double Random :: lorentzian_dist(double mu = 0 ,double gamma = 1) {
-                                                          
-        double y = Rannyu();
-        return gamma*tan(M_PI*(y-0.5))+mu;
-};
 /*
 double Random :: accept_reject(double xmin=0, double xmax=1, double pmax=1) {
 
@@ -168,52 +157,6 @@ void print_matrix(vector<vector<double>> m, string file) {
 				
 	fd.close();
 };
-
-template <typename T>
-double chiquadro(vector<T> observed, double expected) {
-	vector<double> chi_i; 
-	for (auto el : observed) chi_i.push_back((el-expected)*(el-expected)/expected);
-	return accumulate(chi_i.begin(),chi_i.end(),0.);
-};
-
-double genera_angolo_senzaPI (Random rnd) {
-
-	double x=rnd.Rannyu();
-        double y=rnd.Rannyu();
-        double theta;
-	while(x*x+y*y>=1){
-        	x=rnd.Rannyu();
-        	y=rnd.Rannyu();
-	}
-        theta=asin(y/sqrt(x*x+y*y));
-
-        return theta;
-};
-
-vector<double> esperimento_Buffon(Random rnd,int n,int M, double dist_lines,double L_needle) {
-
- vector<int> N_hit(n,0.);//to count the number of hits in each block
- vector<int> N_thr(n,M/n);//number of throwns in each block 
- vector<double> pi;
- double y,theta;
-
- //using traslational symmetry over x and
- //periodic symmetry over y (dist_lines)
- //and symmetry over half circle (generiting angle between -Pi/2 and Pi/2)
- for (int i=0;i<n;i++) {
-         for (int j=0;j<M/n;j++) {
-                y=rnd.Rannyu();
-                theta=genera_angolo_senzaPI(rnd);
-                //theta=rnd.Rannyu(0.,2*M_PI);
-                if(y+L_needle*sin(theta) > dist_lines || y+L_needle*sin(theta) < 0) N_hit[i]++;
-                }
-	 pi.push_back(2*L_needle*N_thr[i]/(N_hit[i]*dist_lines));//storing a value of pi
-	 							 //for each block
-        }
-
- return pi;
-
- };
 
 void data_blocking(int N,vector<double> simulation_value, double real_value, string file) {
  
@@ -348,9 +291,11 @@ vector<double> last_data_from_datablocking(int N,vector<double> simulation_value
 void sqrt_variance_RW (Random& rnd,int M,int N,int N_step, string file, int discr_or_cont) {
  
  vector<double> salva_dist;
+ int L=M/N;
  vector<double> origin(3,0.);//start from the origin
- vector<vector<double>> v(N_step);
- vector<double> v_mean(N);
+ vector<vector<double>> v(N_step);//matrix with N_step columns, each column contains M different values of
+ 				  //the single step calculated for each simulation
+ vector<double> v_mean(N);//vector used to do the last_data_blocking for each step
  vector<double> data;
 
  if(discr_or_cont==0) {
@@ -375,19 +320,14 @@ void sqrt_variance_RW (Random& rnd,int M,int N,int N_step, string file, int disc
  fd.open(file,ios::out);//open file to save the square root variance values and their uncertainties
  			//sqrt(<r^2>)
  for (int j=0;j<N_step;j++) {
-
         for (int i=0;i<M;i++) v[j].push_back(salva_dist[i*(N_step)+j]);//storing in a vector the
 	//relative square distance of a single step for each iteration
-
-                for (int k=0;k<N;k++) v_mean.push_back(sqrt( mean(v[j], (k+1)*M/N, k*M/N ) ));
-
+                for (int k=0;k<N;k++) v_mean.push_back(sqrt( mean(v[j], (k+1)*L, k*L ) ));
         data = last_data_from_datablocking(N,v_mean);
         fd << data[0] << " " <<data[1] << endl;
         v_mean.clear();
         data.clear();
  }
-
  fd.close();
-
 };
 

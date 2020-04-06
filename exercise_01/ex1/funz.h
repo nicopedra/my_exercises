@@ -28,11 +28,6 @@ public:
   double Rannyu(void);
   double Rannyu(double min, double max);
   double Gauss(double mean, double sigma);
-  double exponential_dist(double);//generate random number with
-       			          //exponential distribution	
-  double lorentzian_dist(double,double);//generate random number with
-                                        //lorentzian distribution
-
    };
 
 Random random_initialization();
@@ -46,16 +41,8 @@ double dev_std_mean(vector<double>);
 
 void print_vector(vector<double>, string);
 
-void print_matrix(vector<vector<double>>, string);
-
 template <typename T>
 double chiquadro(vector<T> observed, double expected);
-
-double genera_angolo_senzaPI (Random);//generate a uniform angle in [-PI/2,PI/2]
-
-vector<double> Buffon(Random,int,int,double,double);//simulate the Buffon experiment:
-						    //passing a random generator, number of blocks,
-						    //total throws, dist_lines and L_needle 	
 
 void data_blocking(int,vector<double>, double, string);//passing the number of blocks N, 
 						       //the vector conteining the N values calculated in each block,

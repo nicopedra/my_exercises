@@ -16,7 +16,7 @@ void Random :: SaveSeed(){
   return;
 };
 
-double Random :: Gauss(double mean, double sigma) {
+double Random :: Gauss(double mean=0, double sigma=1) {
    double s=Rannyu();
    double t=Rannyu();
    double x=sqrt(-2.*log(1.-s))*cos(2.*M_PI*t);
@@ -65,18 +65,29 @@ void Random :: SetRandom(int * s, int p1, int p2){
   return;
 };
 
-double Random :: exponential_dist(double lambda = 1) { 
+double Random :: exponential_dist(double lambda = 1) {  
                                                   
         double y = Rannyu();
         return -1/lambda*log(1-y);
 };
 
-double Random :: lorentzian_dist(double mu = 0 ,double gamma = 1) {//generate random number with
-                                                          	   //lorentzian distribution
+double Random :: lorentzian_dist(double mu = 0 ,double gamma = 1) {
+                                                          
         double y = Rannyu();
         return gamma*tan(M_PI*(y-0.5))+mu;
 };
+/*
+double Random :: accept_reject(double xmin=0, double xmax=1, double pmax=1) {
 
+	double x = Rannyu(xmin,xmax);
+	double r = Rannyu(); 
+	if ( r < (p(x)/pmax ) return x;
+	else return accept_reject();
+};	
+*/
+double Random :: retta() {
+	return 1.-sqrt(1.-Rannyu());
+};
 
 Random random_initialization() {
 
@@ -111,19 +122,6 @@ double error(vector<double> AV, vector<double> AV2, int i) {
 	else return sqrt( (AV2[i]-AV[i]*AV[i]) / double(i) );
 };
 
-double mean(vector<double> v,int last_index, int first_index = 0) {
-	double sum = 0;
-	for (int i=first_index; i<last_index; i++) sum += v[i];
-        return sum/(last_index-first_index);
-};       
-
-double dev_std_mean(vector<double> v) {
-	double Mean = mean(v,v.size());
-	double sum=0;
-	for (auto el : v) sum+= (el-Mean)*(el-Mean);
-	return sqrt(sum)/v.size();
-};
-
 void print_vector(vector<double> v, string file) {
 	fstream fd;
 	fd.open(file,ios::out);
@@ -142,6 +140,7 @@ void print_matrix(vector<vector<double>> m, string file) {
 		}
 		fd << endl;
 	}
+				
 	fd.close();
 };
 
@@ -171,40 +170,83 @@ void data_blocking(int N,vector<double> simulation_value, double real_value, str
 
 };
 
+vector<double> last_data_from_datablocking(int N,vector<double> simulation_value, double real_value= 0.) {
 
-void fill_hist(Random& rnd,int it, vector<vector<double>>& h, vector<int> N, string file) {
+ vector<double> err_prog;
+ vector<double> sum_prog(N,0.);
+ vector<double> simulation_value2;
+ vector<double> su2_prog(N,0.);
 
- int l=0;
- double sum;
- if (file == "hist_stand.txt")//for the standard dice
- 	for(auto & el : N) {//for each N fill the histograms
-        	for (int i=0;i<it;i++) {
-                	sum=0;
-                        for (int j=0; j<el;j++) sum+=rnd.Rannyu();
-		h[l].push_back(sum/el);
+ for (int i=0;i<N;i++) simulation_value2.push_back(simulation_value[i]*simulation_value[i]);
+
+ for (int i=0; i<N; i++) {
+         for (int j=0; j<i+1; j++) {
+                 sum_prog[i] += simulation_value[j];
+                 su2_prog[i] += simulation_value2[j];
+         }
+         sum_prog[i]/=(i+1);
+         su2_prog[i]/=(i+1);
+         err_prog.push_back(error(sum_prog,su2_prog,i));
+ }
+  
+ vector<double> data = {sum_prog[N-1],err_prog[N-1]};
+
+	return data;
+};
+
+double N(double x) { 
+	return 0.5*(1+erf( x/sqrt(2) ) );
+};
+
+vector<double> black_scholes_analitica(double S0,double K,double T,double r,double sigma) {
+	double d1 = 1./(sigma*sqrt(T)) * (log(S0/K) + (r+(sigma*sigma)/2) * T);
+        double d2 = d1-sigma*sqrt(T);
+        double C = S0*N(d1)-K*exp(-r*T)*N(d2);
+        double P = S0 * ( N(d1)-1. ) - K* exp(-r*T)*(N(d2)-1);
+
+return {C,P};
+};
+
+void direct_black_scholes(Random rnd,int M,int n,double S0,double K,double T,double r,double sigma,double realc,double realp) {
+
+	vector<vector<double>> CP(2);
+	double appo;
+	double sumc, sump;
+	int L = M/n;
+	for (int i=0;i<n;i++) {
+		sumc=0;sump=0;
+		for (int j=0;j<L;j++) { 
+			appo = S0*exp((r-sigma*sigma/2.)*T + sigma*rnd.Gauss()*sqrt(T));
+			sumc+=exp(-r*T)*max(0.,appo-K);
+			sump+=exp(-r*T)*max(0.,K-appo);
 		}
-	l++;
-	}
- else if (file == "hist_exp.txt")//for exponential dice
-        for(auto & el : N) {//for each N fill the histograms
-                for (int i=0;i<it;i++) {
-                        sum=0;
-                        for (int j=0; j<el;j++) sum+=rnd.exponential_dist();
-                h[l].push_back(sum/el);
-                }
-        l++;
-        }
- else//for lorentzian dice
-     for(auto & el : N) {//for each N fill the histograms
-     	for (int i=0;i<it;i++) {
-        	sum=0;
-                for (int j=0; j<el;j++) sum+=rnd.lorentzian_dist();
-                h[l].push_back(sum/el);
-                }
-        l++;
-        }
+		CP[0].push_back(sumc/L);
+                CP[1].push_back(sump/L);
+       }
+	data_blocking(n,CP[0],realc,"directC.txt");
+	data_blocking(n,CP[1],realp,"directP.txt");		
+};
 
- print_matrix(h,file);
+void discret_black_scholes(Random rnd,int M,int n,int n_step,double S0,double K,double T,double r,double sigma,double realc,double realp) {
 
+        vector<vector<double>> CP(2);
+        double appo;
+	int L = M/n;
+	double sumc,sump;
+        for (int j=0;j<n;j++) {
+		sumc=0;sump=0;
+                for (int i=0;i<L;i++) {
+			appo = S0;
+			for (int k=0;k<n_step;k++) 
+                		 appo*=exp( (r-sigma*sigma/2.)*(T/n_step) + sigma*rnd.Gauss()*sqrt(T/n_step) );
+			sumc+=exp(-r*T)*max(0.,appo-K);
+			sump+=exp(-r*T)*max(0.,K-appo);
+                }
+		CP[0].push_back(sumc/L);
+                CP[1].push_back(sump/L);
+        }
+	data_blocking(n,CP[0],realc,"discreteC.txt");
+	data_blocking(n,CP[1],realp,"discreteP.txt");
 
 };
+

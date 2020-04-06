@@ -8,7 +8,7 @@ using namespace std;
 //###########################################################
 
 //################################# EXERCISE 1 ##################
- int M=1000000;//number of throwns
+ int M=10000;//number of throwns
  int N=100;//number of blocks
 
  data_blocking(N,uniform_integral(rnd,M,N),1.,"data_uniform_I.txt");
@@ -16,8 +16,8 @@ using namespace std;
 
 //################################ EXERCISE 2 ##################
 
- M=10000;//number of simulations
- N=100;//number of blocks (in order to do statistics using data blocking)
+ //M = number of simulations
+ //N = number of blocks (in order to do statistics using data blocking)
  int N_step=100;//number of steps in each RW simulation
 
  sqrt_variance_RW (rnd,M,N,N_step,"data_RW_discr.txt",0);
