@@ -1,0 +1,23 @@
+0
+1.2
+108
+0.05
+5.0
+0.0005
+10000
+1000
+
+  ReadInput >> restart;
+  ReadInput >> temp;
+  ReadInput >> npart;
+  ReadInput >> rho;
+  ReadInput >> rcut;
+  ReadInput >> delta;
+  ReadInput >> nstep;
+  ReadInput >> iprint;
+
+NOTA: restart manca nei file input.solid e input.liquid
+va inserito.
+
+restart: necessario per scegliere se partire da una configurazione r(t-dt) generata con velocità random (restart=0), oppure leggere le configurazioni ottenute dalla simulazione precedente (restart=1).
+
