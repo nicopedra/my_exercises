@@ -4,7 +4,7 @@ using namespace arma;
 using namespace std;
 
 void Input(void){ //Prepare all stuff for the simulation
-  ifstream ReadInput,ReadConf,ReadPrecedentConf;
+  ifstream ReadInput;
   double ep, ek, pr, et, vir;
 
   cout << "Classic Lennard-Jones fluid        " << endl;
@@ -50,25 +50,18 @@ void Input(void){ //Prepare all stuff for the simulation
   it = 3; //Temperature
   n_props = 5; //Number of observables, already add pressure
 
-//in old.0 there is the last configuration of precedent simulation
-//in old.final there is the penultimate configuratin of precedent simulation
 
-   string file_start;
-if(restart == 1) file_start = "old.0";
-else file_start = "config.0";
-
+string start_file;
+if(restart == 1) start_file = "config.0";
+else start_file = "config.fcc";
 //Read initial configuration
-  cout << "Read initial configuration from file "+file_start << endl << endl;
-  ReadConf.open(file_start);
-  X.load(file_start);
+  cout << "Read initial configuration from file "+start_file << endl << endl;
+  X.load(start_file);
   X = X*box;
-  ReadConf.close();
 
 if(restart == 1) {
-	ReadPrecedentConf.open("old.final");
-	Xold.load("old.final");
+	Xold.load("config.final");//penultimate configuration
 	Xold = Xold*box;
-  	ReadPrecedentConf.close();
 	double sumv2_arma=0.0, fs_arma;
 	mat appo = Xold;
 	Move();
@@ -152,7 +145,15 @@ void Measure(){ //Properties measurement
     stima_kin = t/(double)npart; //Kinetic energy per particle
     stima_temp = (2.0 / 3.0) * t/(double)npart; //Temperature
     stima_etot = (t+v)/(double)npart; //Total energy per particle
-    stima_press = rho*stima_temp+1/vol*(w/(double)npart);//pressure
+    stima_press = (rho*stima_temp+(w/vol)) / double(npart);//pressure
+
+    //##################### RAGIONAMENTO CALCOLO PRESSIONE ###################
+    //P = rho*T*kb + W/(3*V) 
+    //in unità riscalate P' = rho'*T' + W'/(3*V') , dove con ' ho denotate le 
+    //grandezze in unità LJ, ricordo che rho' = N/V'
+    //ora penso a come calcolare il lavoro fatto dal sistema = P'V' (in modo semplice)
+    //P'V' = T'*N + W'/3--> così non è ancora per unità di particella
+    //mi manca dividere per N
 
     //saving here to do data_blockig later
     properties[0].push_back(stima_pot);
@@ -188,8 +189,8 @@ void Print(vector<double> v, string name) {
 void PenultimateConf(void) {
 
   fstream WriteConf;
-  cout << "Print penultimate configuration to file old.final " << endl << endl;
-  WriteConf.open("old.final",ios::out);
+  cout << "Print penultimate configuration in config.final " << endl << endl;
+  WriteConf.open("config.final",ios::out);
   mat Y = X/box;//it is not yet the last step
   Y.print(WriteConf);
   WriteConf.close();
@@ -199,27 +200,19 @@ void PenultimateConf(void) {
 
 void ConfFinal(void){ //Write final configuration
   fstream WriteConf;
-  fstream lastconf;
 
-  cout << "Print final configuration to file config.final " << endl << endl;
-  WriteConf.open("config.final",ios::out);
-  lastconf.open("old.0",ios::out);
+  cout << "Print final configuration in config.0 " << endl << endl;
+  WriteConf.open("config.0",ios::out);
   X = X/box;
   X.print(WriteConf);
-  X.print(lastconf);
   WriteConf.close();
-  lastconf.close();
 
   return;
 }
 
 void ConfXYZ(int nconf){ //Write configuration in .xyz format
-  //fstream WriteXYZ;
   fstream AllXYZ;
   AllXYZ.open("traj.xyz",ios::app);
-  //WriteXYZ.open("frames/config_" + to_string(nconf) + ".xyz",ios::out);
-  //WriteXYZ << npart << endl;
-  //WriteXYZ << "This is only a comment!" << endl;
   if (nconf == 1) {
   AllXYZ << npart << endl;
   AllXYZ << "This is only a comment!" << endl;
@@ -227,11 +220,9 @@ void ConfXYZ(int nconf){ //Write configuration in .xyz format
   mat Y = Pbc(X);
   vector<string> mark(npart,"LJ ");
   for (int i=0;i<npart;i++){
-	 // WriteXYZ << mark[i] << Y(i,0) << Y(i,1) << Y(i,2) << endl;
 	  AllXYZ << mark[i] << Y(i,0) << Y(i,1) << Y(i,2) << endl;
   }
   AllXYZ.close();
-  //WriteXYZ.close();
 }
 
 double Pbc(double r) {  //Algorithm for periodic boundary conditions with side L=box
@@ -260,7 +251,6 @@ vector<double> v_mean;
 	 	 	else for(auto& el : v_mean) el = el*Eps;//energies 
 		 }		
 	 data_blocking(N,v_mean,0,el+to_string(nstep)+".out");
-         //data_blocking(N,v_mean,0,el+to_string(nstep)+"SI.out");//in SI unit
 	 j++;
 	 v_mean.clear();
  }

@@ -4,4 +4,8 @@ compila: MolDyn_NVE.cpp funz.cpp MolDyn_NVE.h
 	g++ MolDyn_NVE.cpp -o MolDyn_NVE  $(FLAGS) 
 
 clean:  
-	rm MolDyn_NVE 
+	rm MolDyn_NVE
+
+copy:
+	cp config.0 old.0
+	cp config.final old.final

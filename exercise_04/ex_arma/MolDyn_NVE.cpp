@@ -22,15 +22,15 @@ int main(){
   Eps = eps_kb*(1.38e-23);//Joule
   m = 39.948;//amu
 //######################
-  int nconf = 1;
-  int N = 100; //number of blocks
+  //int nconf = 1;
+  int N = 100; //number of blocks, data_blocking
   for(int istep=1; istep <= nstep; ++istep) {
      Move();           //Move particles with Verlet algorithm
      if(istep%iprint == 0) cout << "Number of time-steps: " << istep << endl;
-     if(istep%10 == 0){
+     if(istep%10 == 0){//every 10 steps, avoiding correlations
         Measure();     //Properties measurement
 	//ConfXYZ(nconf);//Write actual configuration in XYZ format  
-        nconf += 1;
+        //nconf += 1;
      }
      if (istep==nstep-1) PenultimateConf(); 
   }
@@ -39,7 +39,13 @@ int main(){
   data_blocking_MD(N);// normalized values
   //data_blocking_MD(N,sigma,eps_kb,Eps); //when you want values in SI unit
   double time = timer.toc();
-  cout << "time passed: " << time <<"s" << endl; 
+  cout << endl;
+  cout <<"################################################################" << endl;
+  cout << "REMEMBER: if want to save final and penultimate configurations" << endl;
+  cout <<"in file old.0 (last one) and old.final(penultimate) do command-> make copy" << endl;
+  cout <<"##################################################################" << endl;
+  cout << endl;
+  cout << "time passed: " << time <<"s" << endl;
   return 0;
 }
 
