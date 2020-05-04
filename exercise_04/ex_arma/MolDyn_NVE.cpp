@@ -23,9 +23,11 @@ int main(){
   m = 39.948;//amu
 //######################
   //int nconf = 1;
+  //print_conf();
   int N = 100; //number of blocks, data_blocking
   for(int istep=1; istep <= nstep; ++istep) {
      Move();           //Move particles with Verlet algorithm
+     if (istep ==2) print_conf();
      if(istep%iprint == 0) cout << "Number of time-steps: " << istep << endl;
      if(istep%10 == 0){//every 10 steps, avoiding correlations
         Measure();     //Properties measurement

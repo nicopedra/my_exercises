@@ -51,6 +51,7 @@ double delta;
 //functions
 void Input(void);
 void Move(void);
+void print_conf(void);
 void PenultimateConf(void); 
 void ConfFinal(void);
 void ConfXYZ(int);

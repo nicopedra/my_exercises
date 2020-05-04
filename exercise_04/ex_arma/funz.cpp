@@ -59,6 +59,8 @@ else start_file = "config.fcc";
   X.load(start_file);
   X = X*box;
 
+  print_conf();
+
 if(restart == 1) {
 	Xold.load("config.final");//penultimate configuration
 	Xold = Xold*box;
@@ -184,6 +186,13 @@ void Print(vector<double> v, string name) {
    fstream fd; fd.open(name,ios::app);
    for (auto& el : v) fd << el << endl;
    fd.close();
+}
+
+void print_conf(void) {
+
+	cout << "print actual configuration: " << endl;
+	mat Y = X/box;
+	Y.print();
 }
 
 void PenultimateConf(void) {

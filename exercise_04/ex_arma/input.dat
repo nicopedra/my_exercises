@@ -1,10 +1,10 @@
 1
-1.2
+1.4
 108
-0.05
-5.0
+1.1
+2.2
 0.0005
-100000
+10000
 1000
 
   ReadInput >> restart;
@@ -16,6 +16,6 @@
   ReadInput >> nstep;
   ReadInput >> iprint;
 
-restart: necessario per scegliere se partire da una configurazione r(t-dt) generata con velocità random (restart=0),
+restart: necessario per scegliere se partire da una configurazione r(t-dt) generata con velocità random (restart=0), 
 oppure leggere le configurazioni ottenute dalla simulazione precedente (restart=1).
 
