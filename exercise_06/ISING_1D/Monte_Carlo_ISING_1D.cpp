@@ -184,6 +184,9 @@ void Measure()
   walker[im] = m;
   walker[ic] = u2;
   walker[ix] = chi;
+  ofstream Ene("inst_ene.out",ios::app);
+  Ene << u/(double)nspin << endl;
+  Ene.close();
 // INCLUDE YOUR CODE HERE
 }
 

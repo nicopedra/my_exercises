@@ -11,17 +11,14 @@ void Input(void){ //Prepare all stuff for the simulation
   cout << "Molecular dynamics simulation in NVE ensemble  " << endl << endl;
   cout << "Interatomic potential v(r) = 4 * [(1/r)^12 - (1/r)^6]" << endl << endl;
   cout << "The program uses Lennard-Jones units " << endl;
-
-  //seed = 1;    //Set seed for random numbers
-  //srand(seed); //Initialize random number generator
   
   ReadInput.open("input.dat"); //Read input
 
-  ReadInput >> restart;
   if(restart == 1) 
 	  cout << "reading configurations from precedent simulation: " << endl;
   else  
 	  cout << "using method of random velocities: " << endl;
+
   ReadInput >> temp;
   cout << "target temperature = " << temp << endl;
   ReadInput >> npart;
@@ -34,6 +31,7 @@ void Input(void){ //Prepare all stuff for the simulation
   cout << "Edge of the simulation box = " << box << endl;//unità sigma
 
   ReadInput >> rcut;
+  cout << "rcut: " << rcut << endl;
   ReadInput >> delta;//guardo slide per capire le unità di misura. viene usato l'epsilon dell'argon
   ReadInput >> nstep;
   ReadInput >> iprint;//ogni quanto stampare a che punto sono della simulazione
@@ -44,12 +42,20 @@ void Input(void){ //Prepare all stuff for the simulation
   ReadInput.close();
 
 //Prepare array for measurements   //they're just indices
-  iv = 0; //Potential energy
-  ik = 1; //Kinetic energy
-  ie = 2; //Total energy
-  it = 3; //Temperature
+  //iv = 0; //Potential energy
+  //ik = 1; //Kinetic energy
+  //ie = 2; //Total energy
+  //it = 3; //Temperature
+  vtail = (8.0*M_PI*rho)/(9.0*pow(rcut,9)) - (8.0*M_PI*rho)/(3.0*pow(rcut,3));
+  ptail = (32.0*M_PI*rho)/(9.0*pow(rcut,9)) - (16.0*M_PI*rho)/(3.0*pow(rcut,3));
+  cout << "vtail: " << vtail << endl;
+  cout << "ptail: " << ptail << endl;
   n_props = 5; //Number of observables, already add pressure
-
+  bin_size = (box*0.5)/nbins;
+  cout << "size of each bin: " << bin_size << endl;
+  for (uword i=0;i<=nbins;i++) edges[i] = i*bin_size; 
+  mat v(nstep/10.,nbins); //ogni riga è una gdir
+  stima_gdir = v;
 
 string start_file;
 if(restart == 1) start_file = "config.0";
@@ -58,8 +64,6 @@ else start_file = "config.fcc";
   cout << "Read initial configuration from file "+start_file << endl << endl;
   X.load(start_file);
   X = X*box;
-
-  print_conf();
 
 if(restart == 1) {
 	Xold.load("config.final");//penultimate configuration
@@ -74,8 +78,7 @@ if(restart == 1) {
 	V = V*fs_arma;
 	Xold = Pbc(X-V*delta);
      }
-
-else {
+else{
 //Prepare initial velocities
    cout << "Prepare random velocities with center of mass velocity equal to zero " << endl << endl;
    V.randu(npart,3);
@@ -88,7 +91,15 @@ else {
    V = V*fs_arma;
    Xold = Pbc(X-V*delta);
 }
-   return;
+
+
+Measure(0);
+
+//Print initial values for the potential energy and virial
+  cout << "Initial potential energy (with tail corrections) = " << stima_pot+vtail << endl;
+  cout << "Pressure (with tail corrections) = " << stima_press+ptail*(double)npart/vol << endl << endl;
+
+
 }
 
 
@@ -119,8 +130,9 @@ mat Force() {
      return F;
 }
 
-void Measure(){ //Properties measurement
+void Measure(int nconf){ //Properties measurement
   double v, w, t;
+  int bin;
 
   v = 0.0; //reset observables
   w = 0.0;
@@ -129,40 +141,47 @@ void Measure(){ //Properties measurement
  mat D_vec;
  mat Dr;
  uvec ind;
-
+ //uvec h(nbins+1,fill::zeros);
+ rowvec h(nbins*10,fill::zeros); //per sicurezza metto tante coordinate. ma quelle che mi interessano solo le prime nbins
  for (uword i=0;i<npart-1;i++) {
 	 D_vec = X(span(i+1,npart-1),span::all);
 	 D_vec.each_row() -= X.row(i);
 	 D_vec = Pbc(-D_vec);
 	 Dr = sqrt(sum(pow(D_vec,2),1));
+	  
+	 for (auto& el : Dr) {
+		 bin = int(el/bin_size);
+		 h[bin] = h[bin] + 2;
+	 }
+	 
+	 //h += histc(Dr,edges); //in armadillo
 	 ind = find(Dr<rcut && Dr>0);
 	 for(auto& el : ind) {
 		v += 4.0/pow(Dr[el],12) - 4.0/pow(Dr[el],6);//potential
 		w += 16.0/pow(Dr[el],12) - 8.0/pow(Dr[el],6);//virial
 	 }
- }	 
-   t = 0.5*sum(sum(pow(V,2)));
+ }
+   double deltaVr;
+   //vec hv =conv_to<vec>::from(h);
+    for (uword i=0;i<nbins;i++){
+	deltaVr = -4.*M_PI/3. * ( pow(edges(i),3) - pow(edges(i+1),3));
+    	h(i) /= (rho*npart*deltaVr);
+    }
+    stima_gdir.row(nconf) = h(span(0,nbins-1)); 	
+    t = 0.5*sum(sum(pow(V,2)));
 
-    stima_pot = v/(double)npart; //Potential energy per particle
+    stima_pot = v/(double)npart;  //+vtail; //Potential energy per particle
     stima_kin = t/(double)npart; //Kinetic energy per particle
     stima_temp = (2.0 / 3.0) * t/(double)npart; //Temperature
     stima_etot = (t+v)/(double)npart; //Total energy per particle
-    stima_press = (rho*stima_temp+(w/vol)) / double(npart);//pressure
-
-    //##################### RAGIONAMENTO CALCOLO PRESSIONE ###################
-    //P = rho*T*kb + W/(3*V) 
-    //in unità riscalate P' = rho'*T' + W'/(3*V') , dove con ' ho denotate le 
-    //grandezze in unità LJ, ricordo che rho' = N/V'
-    //ora penso a come calcolare il lavoro fatto dal sistema = P'V' (in modo semplice)
-    //P'V' = T'*N + W'/3--> così non è ancora per unità di particella
-    //mi manca dividere per N
+    stima_press = rho*stima_temp+(w/vol);  //+ptail*(double)npart/vol;//pressure
 
     //saving here to do data_blockig later
-    properties[0].push_back(stima_pot);
+    properties[0].push_back(stima_pot+vtail);
     properties[1].push_back(stima_kin);
     properties[2].push_back(stima_temp);
-    properties[3].push_back(stima_etot);
-    properties[4].push_back(stima_press);
+    properties[3].push_back(stima_etot+vtail);
+    properties[4].push_back(stima_press+ptail*(double)npart/vol);
 
     return;
 }
@@ -179,7 +198,7 @@ void print_properties() {
   Print(properties[3],name);
   name = "output_press"+ to_string(nstep)+".dat";
   Print(properties[4],name);
-  cout << "mean temperature: " << mean(properties[2],properties[2].size())<< endl;
+  //cout << "mean temperature: " << mean(properties[2],properties[2].size())<< endl;
 }
 
 void Print(vector<double> v, string name) {
@@ -195,26 +214,19 @@ void print_conf(void) {
 	Y.print();
 }
 
-void PenultimateConf(void) {
+void ConfFinal(void){ //Write finals configuration
 
-  fstream WriteConf;
+  fstream WriteOldConf("config.final",ios::out);
   cout << "Print penultimate configuration in config.final " << endl << endl;
-  WriteConf.open("config.final",ios::out);
-  mat Y = X/box;//it is not yet the last step
-  Y.print(WriteConf);
-  WriteConf.close();
-  
-  return;
-}
+  mat Y = Xold/box;//it is not yet the last step
+  Y.print(WriteOldConf);
+  WriteOldConf.close();
 
-void ConfFinal(void){ //Write final configuration
-  fstream WriteConf;
-
+  fstream WriteFinalConf("config.0",ios::out);
   cout << "Print final configuration in config.0 " << endl << endl;
-  WriteConf.open("config.0",ios::out);
   X = X/box;
-  X.print(WriteConf);
-  WriteConf.close();
+  X.print(WriteFinalConf);
+  WriteFinalConf.close();
 
   return;
 }
@@ -244,27 +256,68 @@ mat Pbc(mat M) {
  return Y;
 }
 
-void data_blocking_MD(int N,double sigma,double eps_kb,double Eps) {
+void data_blocking_MD(int N) {
 
 int L = (nstep/10.)/N; //cause I measure properties each 10 steps
 vector<string> names = {"ave_epot","ave_ekin","ave_temp","ave_etot","ave_press"};
+string gdir_name = "output.gave.out";
 int j=0;
 vector<double> v_mean;
-
+vector<double> data(2);
  for (auto & el : names) {
 	for (int i=0;i<N;i++) 
 		 v_mean.push_back( mean(properties[j], (i+1)*L, i*L ));
-		 if(Eps!=0) {
-       		 	if(j==2) for(auto& el : v_mean) el = el*eps_kb;//temp
-			else if (j==4) for(auto& el : v_mean) el = el*Eps/(pow(sigma,3));//pressure
-	 	 	else for(auto& el : v_mean) el = el*Eps;//energies 
-		 }		
-	 data_blocking(N,v_mean,0,el+to_string(nstep)+".out");
+	 if ( j== 2) data = last_data_from_datablocking(N,v_mean);  
+         data_blocking(N,v_mean,0,el+to_string(nstep)+".out");
+	 properties[j].clear();
 	 j++;
 	 v_mean.clear();
  }
 
+ accettazione = data[1]*0.8;
+ m_temp = data[0];
+ cout << "temperatura di ora: " << data[0] << " , con incertezza: " << data[1]<< endl;
+ // radial correlation function analysis
+ ofstream Gave(gdir_name,ios::out);
+ vector<double> appo;
+ for (int i=0;i<nbins;i++) {
+ 	for (auto& el : stima_gdir.col(i)) appo.push_back(el);
+        for (int j=0;j<N;j++) 
+		 v_mean.push_back(mean(appo, (j+1)*L, j*L ));
+        data = last_data_from_datablocking(N,v_mean);
+	v_mean.clear();
+	appo.clear();
+	Gave << (bin_size*0.5+i*bin_size) <<"\t"<<data[0] <<"\t" <<data[1]<< endl;
+	v_mean.clear();
+	appo.clear();
+ }
+
+Gave.close(); 
 };
+
+vector<double> last_data_from_datablocking(int N,vector<double> simulation_value) {
+
+ vector<double> err_prog;
+ vector<double> sum_prog(N,0.);
+ vector<double> simulation_value2;
+ vector<double> su2_prog(N,0.);
+ vector<double> data(2);
+ for (int i=0;i<N;i++) simulation_value2.push_back(simulation_value[i]*simulation_value[i]);
+
+ for (int i=0; i<N; i++) {
+         for (int j=0; j<i+1; j++) {
+                 sum_prog[i] += simulation_value[j];
+                 su2_prog[i] += simulation_value2[j];
+         }
+         sum_prog[i]/=(i+1);
+         su2_prog[i]/=(i+1);
+         err_prog.push_back(error(sum_prog,su2_prog,i));
+ }
+	data = {sum_prog[N-1],err_prog[N-1]};
+
+	return data;
+};
+
 
 void data_blocking(int N,vector<double> simulation_value, double real_value, string file) {
 
@@ -287,8 +340,8 @@ void data_blocking(int N,vector<double> simulation_value, double real_value, str
 
          fstream fd;
          fd.open(file,ios::out);
-         for (int i=0; i<N;i++) fd << sum_prog[i]-real_value<<" "<< err_prog[i] << endl;
-         fd.close();
+	 for (int i=0; i<N;i++) fd << sum_prog[i]-real_value<<" "<< err_prog[i] << endl;
+	 fd.close();
 
 };
 
@@ -300,7 +353,7 @@ double error(vector<double> AV, vector<double> AV2, int i) {
 double mean(vector<double> v,int last_index, int first_index) {
 	double sum = 0;
 	for (int i=first_index; i<last_index; i++) sum += v[i];
-        return sum/(last_index-first_index);
+        return sum/(double)(last_index-first_index);
 }; 
 
 /****************************************************************

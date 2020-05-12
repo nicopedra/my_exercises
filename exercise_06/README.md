@@ -16,7 +16,7 @@ il (0) è il makefile (basta eseguire make e compila)
 (2) dichiarazione delle funzioni CON LORO DESCRIZIONE. per sapere cosa fa una
 certa funzione occorre cercarla in questo file con la rispettiva descrizione
 (3) bash script che fa partire una simulazione per un certo range di 
-temperatura
+temperatura (per calcolare le quantità fisiche nel range di temperature desiderato)
 
 nota: bisogna dare da linea di comando la temperatura desiderata e
 il parametro restart, per ripartire dalla configurazione delle simulazione
