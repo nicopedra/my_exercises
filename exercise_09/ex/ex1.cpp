@@ -10,19 +10,14 @@ using namespace arma;
 
 //################################# EXERCISE 1 ##################
 
-//funziona! ma ancora la selezione non va bene.. arrivo a un cammino troppo lungo
-
- vector<int> v = {1,1,1,1,1,1,1,1,1};
- cout << square_norm(v.begin(),v.end(),0.) << endl;
-
  int iterations=50000;//10'000 deve andare bene
  iprint = 1000;
  int cities = 32;
  //non mi interessa sapere il lato o il raggio, li ho messi uguale a 1
  //on a circumference
- //initialize_circon(rnd,cities);
+ initialize_circon(rnd,cities);
  //inside a square 
- initialize_square(rnd,cities);
+ //initialize_square(rnd,cities);
 
  cout << "cities coordinates in a circumference: " << endl;
  for (auto el : city_coordinates) 
@@ -30,7 +25,7 @@ using namespace arma;
  cout << endl;
  cout << endl;
  int size_population = cities;//cities*2;
- Population P(size_population,cities,0.1,0.7);
+ Population P(size_population,cities,0.1,0.8);
 
  cout << "########################" << endl;
  cout << "population size: " << P.get_size() << endl;

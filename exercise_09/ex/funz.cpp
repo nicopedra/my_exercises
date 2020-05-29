@@ -136,7 +136,6 @@ if (r < p_c) {
 	if (new_child_one != new_child_two) {
 
 		taglio = genes*0.5;
-
 		//mi tengo i geni prima del taglio e li salvo in old_child
 
 		copy(new_child_two.begin(),
@@ -255,10 +254,9 @@ if (crossv) {
 	new_child_one.clear();
         new_child_two.clear();
 
-return;	
+return;
+
 }
-
-
 
 void Population :: order_chrom() {
         sort(chromosomes.begin(), chromosomes.end(), costLess);	
