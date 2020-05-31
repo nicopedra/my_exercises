@@ -87,6 +87,8 @@ void Population :: fill_initial_population(vector<int> chromo_0) {
 */
 
 void Population :: fill_initial_population() {
+ new_child_one.resize(genes);
+ new_child_two.resize(genes);
  attempted = 0; accepted = 0; 
  int i = 0;
  vector<int> start_chromo = chromo_0;
@@ -104,18 +106,21 @@ for (auto& el : chromosomes) fitness.push_back(1./cost_function(el));
 	total_fitness = accumulate(fitness.begin(),fitness.end(),0.);
 
 double r;
+
 for (;;) {
 	mother = int(rnd.Rannyu(0,size));
 	r = rnd.Rannyu();
 	if (r < fitness[mother]/total_fitness ) 
 			break;
 }
+
 for (;;) {
 	father = int(rnd.Rannyu(0,size));
 	r = rnd.Rannyu();
 	if (r < fitness[father]/total_fitness) 
 			break;
 }
+
 //libero
 fitness.clear();
 };
@@ -130,53 +135,46 @@ if (r < p_c) {
 	crossv = true;
 	accepted++;
 
-	new_child_one = chromosomes[father];
-	new_child_two = chromosomes[mother];
-
-	if (new_child_one != new_child_two) {
-
 		taglio = genes*0.5;
-		//mi tengo i geni prima del taglio e li salvo in old_child
+		for (int i = 0;i<taglio;i++) {
+			new_child_one[i] = chromosomes[father][i];
+			new_child_two[i] = chromosomes[mother][i];
+		}
 
-		copy(new_child_two.begin(),
-			new_child_two.end()-taglio,
-			back_inserter(old_child_one));
- 		copy(new_child_one.begin(),
-			new_child_one.end()-taglio,
-			back_inserter(old_child_two));
-	
-		for (auto& el : old_child_one)
-			new_child_one.erase(find(new_child_one.begin(),
-					new_child_one.end(),el));
-		for (auto& el : old_child_two)
-			new_child_two.erase(find(new_child_two.begin(),
-					new_child_two.end(),el));
-			
-		reverse(old_child_one.begin(),old_child_one.end());
-		for (auto& el : old_child_one)
-			new_child_one.insert(new_child_one.begin(),el);
+		bool equal_father;
+		bool equal_mother;
+	        int j_mother = 0;
+		int j_father = 0;
 
-		reverse(old_child_two.begin(),old_child_two.end());
-		for (auto& el : old_child_two)
-			new_child_two.insert(new_child_two.begin(),el);
-			
-		//controllo che siano giuste le permutazioni
+		for (int i=0;i<genes;i++) {
+
+		equal_father = false;
+		equal_mother = false;
+		          for (int k = 0;k<taglio+j_mother;k++) 
+		  			if ( chromosomes[mother][i] == new_child_one[k] ) equal_mother = true;
+		  	  for (int k = 0;k<taglio+j_father;k++)  
+					if ( chromosomes[father][i] == new_child_two[k] ) equal_father = true;
+			  	
+			  if ( not equal_mother) {
+				  j_mother++;
+				  new_child_one[taglio-1+j_mother] = chromosomes[mother][i];
+			  }
+			  if ( not equal_father) {
+				  j_father++;
+				  new_child_two[taglio-1+j_father] = chromosomes[father][i];
+			  }
+		}
+		
 		check_function(new_child_two);
 		check_function(new_child_one);
-	
-		old_child_one.clear();
-		old_child_two.clear();
-
-		}
-	
-	this->mutation(rnd,new_child_one);
-	this->mutation(rnd,new_child_two);
-
+		this->mutation(rnd,new_child_one);
+		this->mutation(rnd,new_child_two);
 	}
+	
 }
 
 void Population :: mutation(Random& rnd,vector<int>& v) {
-
+//diversi tipi di mutazione
 //mutazione con una certa probabilità
 double r = rnd.Rannyu();
 if (r < p_m) {
@@ -193,7 +191,7 @@ if (r < p_m) {
       }
       //singolo scambio di città adiacenti
       if (r >= 0.5 && r < 0.75) {
-	        int m = int (rnd.Rannyu(1,genes-1) );
+		int m = int (rnd.Rannyu(1,genes-1) );
 	        swap(* (v.begin()+m) ,*( v.begin()+m+1) );
       }
       //inversione dell'ordine delle città in un certo range
@@ -250,10 +248,6 @@ if (crossv) {
         chromosomes.erase(chromosomes.end());
 	}
     }
-
-	new_child_one.clear();
-        new_child_two.clear();
-
 return;
 
 }
@@ -273,22 +267,19 @@ void check_function (vector<int> test) {
 
 double cost_function(vector<int> chr) {
 
-	vector<double> v;
-	vector<double> appo;
+	vector<double> v(chr.size());
+	vector<double> appo(city_coordinates[0].size());
 
-	for (int k = 0; k < chr.size();k++) {
-		if (k!=chr.size()-1){ 
-			appo = minus_vec(city_coordinates[chr[k]],city_coordinates[chr[k+1]]);
-			//v.push_back(sqrt(square_norm(appo.begin(),appo.end(),0.))); //L1
-			v.push_back(square_norm(appo.begin(),appo.end(),0.)); //L2
-		}
-		else {
-			appo = minus_vec(city_coordinates[chr[k]],city_coordinates[chr[0]]);
-			//v.push_back( sqrt(  square_norm(appo.begin(),appo.end(),0.) ) ); //L1
-			v.push_back(square_norm(appo.begin(),appo.end(),0.) ) ; //L2
-		}
-		//cout << v[k] << endl;
+	for (int k = 0; k < chr.size()-1;k++) {
+			for (int i=0;i<appo.size();i++) 
+				appo[i]= (city_coordinates[ chr[k] ][i]-city_coordinates[ chr[k+1] ][i] );
+			v[k] = square_norm(appo.begin(),appo.end(),0.); 
 	}
+
+	for (int i=0;i<appo.size();i++) 
+			appo[i] = (city_coordinates[ chr[chr.size()-1] ][i]-city_coordinates[ chr[0] ][i] );
+	v[chr.size()-1] = square_norm(appo.begin(),appo.end(),0.); 
+
         return accumulate(v.begin(),v.end(),0.);
 };
 
@@ -319,29 +310,15 @@ void shift_vector(vector<T> &v, int m,int n) {
 	}
 }
 
-template <typename T>
-vector<T> minus_vec(vector<T> w,vector<T> z) {
-	if (w.size() != z.size()) {
-		cout << "non si può fare" << endl;
-		exit(EXIT_SUCCESS);
-	}
-	else { 
-		int size = w.size();
-		vector<T> v;
-		for (int i=0;i<size;i++) 
-			v.push_back(w[i]-z[i]);
-		return v;
-	}
-}
-
-Random random_initialization() {
+Random random_initialization(int lettura = 0) {
 
    Random rnd;
    int seed[4];
    int p1, p2;
    ifstream Primes("Primes");
    if (Primes.is_open()){
-      Primes >> p1 >> p2 ;
+	for (int k = 0;k<lettura;k++)
+      		Primes >> p1 >> p2 ;
    } else cerr << "PROBLEM: Unable to open Primes" << endl;
    Primes.close();
 

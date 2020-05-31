@@ -21,14 +21,11 @@ int it;
 //contiene le coordinate di ogni singola città
 vector<vector<double>> city_coordinates;
 //per crossover
-vector<int> old_child_one;
-vector<int> old_child_two;
 vector<int> new_child_one;
 vector<int> new_child_two;
 vector<int> chromo_0;
 double total_fitness;
 vector<double> fitness;
-vector<double> range_fitness;
 bool crossv;
 
 class Random {
@@ -52,7 +49,7 @@ public:
   double Gauss(double mean, double sigma);
    };
 
-Random random_initialization();
+Random random_initialization(int);
 
 class Population {
 
@@ -101,9 +98,6 @@ T square_norm (InputIt1,InputIt1,T);
 
 template <typename T>
 void shift_vector(vector<T>&,int,int); 
-
-template <typename T>
-vector<T> minus_vec(vector<T>,vector<T>);
 
 double cost_function(vector<int>); 
 void picture_path(vector<int>,string);
