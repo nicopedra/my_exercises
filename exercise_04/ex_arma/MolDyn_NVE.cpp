@@ -52,7 +52,7 @@ if (argc!=2) {cerr << "insert restart parameter" << endl;
      		if(istep%iprint == 0) cout << "Number of time-steps: " << istep << endl;
      		if(istep%10 == 0){//every 10 steps, avoiding correlations
         		Measure(nconf-1);     //Properties measurement
-			//ConfXYZ(nconf);//Write actual configuration in XYZ format  
+			ConfXYZ(nconf);//Write actual configuration in XYZ format  
         		nconf += 1;
      		}
   	}

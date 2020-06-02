@@ -239,9 +239,11 @@ void ConfXYZ(int nconf){ //Write configuration in .xyz format
   AllXYZ << "This is only a comment!" << endl;
   }
   mat Y = Pbc(X);
-  vector<string> mark(npart,"LJ ");
+  vector<string> mark(npart,"H ");
   for (int i=0;i<npart;i++){
-	  AllXYZ << mark[i] << Y(i,0) << Y(i,1) << Y(i,2) << endl;
+	  //AllXYZ << mark[i] <<"\t" << Y(i,0) <<"\t" << Y(i,1) <<"\t" << Y(i,2) << endl;
+  AllXYZ <<mark[i] <<"\t"<< Y(i,0) <<"\t" << Y(i,1) <<"\t" << Y(i,2) << endl;
+ 
   }
   AllXYZ.close();
 }
