@@ -21,6 +21,7 @@ vector<vector<double>> city_coordinates;
 //per crossover
 vector<int> path_0;
 int it;
+int nconf;
 
 class Random {
 

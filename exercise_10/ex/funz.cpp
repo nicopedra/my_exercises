@@ -92,9 +92,11 @@ void single_MC_SA (Random& rnd,double beta, int n,vector<int>& path) {
 			refused++;
 		}
 		attempted++;
-	     if(i%10 == 0) 
-		     Best << it  << "\t" << cost_function(path) << endl;
-	}
+	     if(i%10 == 0) {
+		     Best << nconf  << "\t" << cost_function(path) << endl;
+		     nconf++;
+	     }
+     	}
 	Best.close();
 };	
 

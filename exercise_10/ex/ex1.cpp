@@ -13,14 +13,10 @@ using namespace arma;
 //################################# EXERCISE 1 ##################
 
  //MC step per each inverse temperature
-#ifdef square
- int N = 5000;
-#else
- int N=1000;
-#endif
-
+ int N=500;
  int cities = 32;
  it = 0;
+ nconf = 0;
 #ifdef square
  cout << cities << " cities inside a square " << endl; 
  initialize_square(rnd,cities);
@@ -40,7 +36,14 @@ using namespace arma;
  vector<double> beta;
 
  //filling inverse temperature 
- for (double i = 2.;i>=0.0002;i-=0.0002) beta.push_back(1./i);//per quadrato
+ int i = 0;
+ double j = 100000;
+ while (i<40) {
+	 j /= 2.;
+	 beta.push_back(1/j);
+	 i++;
+ }
+ //for (double i = 2.;i>=0.0002;i-=0.0002) beta.push_back(1./i);//per quadrato
  //cout << beta.size() << endl;
  //print_vector(beta);
  
@@ -48,7 +51,7 @@ using namespace arma;
   for (auto& el : beta) {
 	it ++;
 	single_MC_SA(rnd,el,N,path);
-	if (it%1000 == 0) {
+	if (it%10 == 0) {
 		cout << "--------------------------------------" << endl;
 		cout << "acceptance MC with inverse temperature " << el <<" is :" << (attempted-refused)/double(attempted) << endl;
 		cout << "--------------------------------------" << endl;
