@@ -12,10 +12,12 @@ _/    _/  _/_/_/  _/_/_/_/ email: Davide.Galli@unimi.it
 #include <fstream>      // Stream class to both read and write from/to files.
 #include <cmath>        // rint, pow
 #include <vector>
-#include <armadillo>
+#include <armadillo>    //armadillo library
 
 using namespace arma;
-using namespace std;
+using namespace std; //armadillo namespace
+
+//to remember physical scale
 /*
 //######## Argon ##########
   sigma = 0.34e-9;//m
@@ -33,29 +35,21 @@ using namespace std;
 //parameters, observables
 const int m_props=5;
 const int nbins = 100;
-int n_props;
-int iv,ik,it,ie;
 double stima_pot, stima_kin, stima_etot, stima_temp,stima_press;
+//tail corrections
 double vtail;
 double ptail;
+//mean temp to understand when stop equilibration
 double m_temp;
 double accettazione;
 
+//to save properties and do blocking average
 vector<vector<double>> properties(m_props);
+//for g(r)
 vec edges (nbins+1);
 mat stima_gdir;
-//############### dimension for a specific molecule #############
-  double sigma;//nm
-  double eps_kb;//kelvin
-  double Eps;//Joule
-  double m;//amu
-//##############################################
-
-// averages
-double acc,att;
 
 //configuration
-const int m_part=108;
 mat X;
 mat Xold;
 mat V;
@@ -70,22 +64,46 @@ int nstep, iprint, seed;
 double delta;
 double bin_size;
 //functions
+
+//Initialization
 void Input(void);
+
+//move particles with Verlet integrator
 void Move(void);
+
+//print actual configurations
 void print_conf(void);
+
+//overwrite config.0 and config.final
 void ConfFinal(void);
+
 void ConfXYZ(int);
+
+//measure physical properties
 void Measure(int);
+
+//print physical istantaneous properties on file
 void print_properties(); 
+
 void Print(vector<double>,string);
+
+//evaluate Force between particles
 mat Force();
+
 double Pbc(double);
+
+//Pbc for matrix object
 mat Pbc(mat);
+
 double error(vector<double>,vector<double>,int);
-void data_blocking(int,vector<double>,double,string);//
+
+void data_blocking(int,vector<double>,double,string);//same as the previous exercises
 vector<double> last_data_from_datablocking(int,vector<double>);
+
 double mean(vector<double>,int,int a=0);//vector, last indice, first indice
+//do the blocking analysis for the MD system
 void data_blocking_MD(int); 
+
 /****************************************************************
 *****************************************************************
     _/    _/  _/_/_/  _/       Numerical Simulation Laboratory

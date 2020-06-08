@@ -4,8 +4,8 @@ using namespace arma;
 using namespace std;
 
 void Input(void){ //Prepare all stuff for the simulation
+
   ifstream ReadInput;
-  double ep, ek, pr, et, vir;
 
   cout << "Classic Lennard-Jones fluid        " << endl;
   cout << "Molecular dynamics simulation in NVE ensemble  " << endl << endl;
@@ -32,29 +32,23 @@ void Input(void){ //Prepare all stuff for the simulation
 
   ReadInput >> rcut;
   cout << "rcut: " << rcut << endl;
-  ReadInput >> delta;//guardo slide per capire le unità di misura. viene usato l'epsilon dell'argon
+  ReadInput >> delta;//picoseconds
   ReadInput >> nstep;
-  ReadInput >> iprint;//ogni quanto stampare a che punto sono della simulazione
+  ReadInput >> iprint;//to know the actual simulation point
 
   cout << "The program integrates Newton equations with the Verlet method " << endl;
   cout << "Time step = " << delta << endl;
   cout << "Number of steps = " << nstep << endl << endl;
   ReadInput.close();
 
-//Prepare array for measurements   //they're just indices
-  //iv = 0; //Potential energy
-  //ik = 1; //Kinetic energy
-  //ie = 2; //Total energy
-  //it = 3; //Temperature
   vtail = (8.0*M_PI*rho)/(9.0*pow(rcut,9)) - (8.0*M_PI*rho)/(3.0*pow(rcut,3));
   ptail = (32.0*M_PI*rho)/(9.0*pow(rcut,9)) - (16.0*M_PI*rho)/(3.0*pow(rcut,3));
   cout << "vtail: " << vtail << endl;
   cout << "ptail: " << ptail << endl;
-  n_props = 5; //Number of observables, already add pressure
   bin_size = (box*0.5)/nbins;
   cout << "size of each bin: " << bin_size << endl;
   for (uword i=0;i<=nbins;i++) edges[i] = i*bin_size; 
-  mat v(nstep/10.,nbins); //ogni riga è una gdir
+  mat v(nstep/10.,nbins); //each row will be a single gdir
   stima_gdir = v;
 
 string start_file;
@@ -99,7 +93,6 @@ Measure(0);
   cout << "Initial potential energy (with tail corrections) = " << stima_pot+vtail << endl;
   cout << "Pressure (with tail corrections) = " << stima_press+ptail*(double)npart/vol << endl << endl;
 
-
 }
 
 
@@ -142,7 +135,7 @@ void Measure(int nconf){ //Properties measurement
  mat Dr;
  uvec ind;
  //uvec h(nbins+1,fill::zeros);
- rowvec h(nbins*10,fill::zeros); //per sicurezza metto tante coordinate. ma quelle che mi interessano solo le prime nbins
+ rowvec h(nbins*2,fill::zeros); //per sicurezza metto tante coordinate. ma quelle che mi interessano solo le prime nbins
  for (uword i=0;i<npart-1;i++) {
 	 D_vec = X(span(i+1,npart-1),span::all);
 	 D_vec.each_row() -= X.row(i);
@@ -198,7 +191,6 @@ void print_properties() {
   Print(properties[3],name);
   name = "output_press"+ to_string(nstep)+".dat";
   Print(properties[4],name);
-  //cout << "mean temperature: " << mean(properties[2],properties[2].size())<< endl;
 }
 
 void Print(vector<double> v, string name) {
@@ -276,9 +268,10 @@ vector<double> data(2);
 	 v_mean.clear();
  }
 
- accettazione = data[1]*0.8;
+ accettazione = data[1];
  m_temp = data[0];
  cout << "temperatura di ora: " << data[0] << " , con incertezza: " << data[1]<< endl;
+
  // radial correlation function analysis
  ofstream Gave(gdir_name,ios::out);
  vector<double> appo;
@@ -294,7 +287,8 @@ vector<double> data(2);
 	appo.clear();
  }
 
-Gave.close(); 
+Gave.close();
+
 };
 
 vector<double> last_data_from_datablocking(int N,vector<double> simulation_value) {
