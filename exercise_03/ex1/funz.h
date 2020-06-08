@@ -37,7 +37,7 @@ public:
   					//lorentzian distribution
    };
 
-Random random_initialization();
+Random random_initialization(int);
 
 double error(vector<double>,vector<double>,int);//useful to evaluate the standard
 
@@ -56,11 +56,13 @@ double N(double);//gauss cumulative function
 
 vector<double> black_scholes_analitica(double,double,double,double,double);
 //analytical solution, parameters are S0,K,T,r,sigma
-void direct_black_scholes(double,double,double,double,double,double,double);
+
+void direct_black_scholes(Random&,int,int,double,double,double,double,double,double);
 //the same as below, without the number of step into divide T
-void discret_black_scholes(double,double,double,double,double,double,double); 
+
+void discret_black_scholes(Random&,int,int,int,double,double,double,double,double,double); 
 //Passing the random generator, number of total throwns, number of blocks for data_blocking
 //number of step into divide T, then the parameters S0,K,T,r,sigma then the last
-//2 values are the values of cut and put-option obteined from the analytical functiog
+//2 values are the values of cut and put-option obteined from the analytical solution
 #endif 
 

@@ -76,27 +76,20 @@ double Random :: lorentzian_dist(double mu = 0 ,double gamma = 1) {
         double y = Rannyu();
         return gamma*tan(M_PI*(y-0.5))+mu;
 };
-/*
-double Random :: accept_reject(double xmin=0, double xmax=1, double pmax=1) {
 
-	double x = Rannyu(xmin,xmax);
-	double r = Rannyu(); 
-	if ( r < (p(x)/pmax ) return x;
-	else return accept_reject();
-};	
-*/
 double Random :: retta() {
 	return 1.-sqrt(1.-Rannyu());
 };
 
-Random random_initialization() {
+Random random_initialization(int lettura) {
 
    Random rnd;
    int seed[4];
    int p1, p2;
    ifstream Primes("Primes");
    if (Primes.is_open()){
-      Primes >> p1 >> p2 ;
+      for (int i=0;i<lettura;i++)
+      	Primes >> p1 >> p2 ;
    } else cerr << "PROBLEM: Unable to open Primes" << endl;
    Primes.close();
 
@@ -207,15 +200,15 @@ vector<double> black_scholes_analitica(double S0,double K,double T,double r,doub
 return {C,P};
 };
 
-void direct_black_scholes(Random rnd,int M,int n,double S0,double K,double T,double r,double sigma,double realc,double realp) {
+void direct_black_scholes(Random& rnd,int M,int n,double S0,double K,double T,double r,double sigma,double realc,double realp) {
 
 	vector<vector<double>> CP(2);
 	double appo;
 	double sumc, sump;
 	int L = M/n;
-	for (int i=0;i<n;i++) {
+	for (int i=0;i<n;i++) {//cycle over blocks
 		sumc=0;sump=0;
-		for (int j=0;j<L;j++) { 
+		for (int j=0;j<L;j++) { //inside a single block
 			appo = S0*exp((r-sigma*sigma/2.)*T + sigma*rnd.Gauss()*sqrt(T));
 			sumc+=exp(-r*T)*max(0.,appo-K);
 			sump+=exp(-r*T)*max(0.,K-appo);
@@ -223,11 +216,12 @@ void direct_black_scholes(Random rnd,int M,int n,double S0,double K,double T,dou
 		CP[0].push_back(sumc/L);
                 CP[1].push_back(sump/L);
        }
+	//blocking
 	data_blocking(n,CP[0],realc,"directC.txt");
 	data_blocking(n,CP[1],realp,"directP.txt");		
 };
 
-void discret_black_scholes(Random rnd,int M,int n,int n_step,double S0,double K,double T,double r,double sigma,double realc,double realp) {
+void discret_black_scholes(Random& rnd,int M,int n,int n_step,double S0,double K,double T,double r,double sigma,double realc,double realp) {
 
         vector<vector<double>> CP(2);
         double appo;
@@ -237,7 +231,7 @@ void discret_black_scholes(Random rnd,int M,int n,int n_step,double S0,double K,
 		sumc=0;sump=0;
                 for (int i=0;i<L;i++) {
 			appo = S0;
-			for (int k=0;k<n_step;k++) 
+			for (int k=0;k<n_step;k++) //discretized T, delivery time
                 		 appo*=exp( (r-sigma*sigma/2.)*(T/n_step) + sigma*rnd.Gauss()*sqrt(T/n_step) );
 			sumc+=exp(-r*T)*max(0.,appo-K);
 			sump+=exp(-r*T)*max(0.,K-appo);
@@ -245,6 +239,7 @@ void discret_black_scholes(Random rnd,int M,int n,int n_step,double S0,double K,
 		CP[0].push_back(sumc/L);
                 CP[1].push_back(sump/L);
         }
+	//blocking
 	data_blocking(n,CP[0],realc,"discreteC.txt");
 	data_blocking(n,CP[1],realp,"discreteP.txt");
 
