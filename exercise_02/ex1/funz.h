@@ -28,7 +28,6 @@ public:
   double Rannyu(void);
   double Rannyu(double min, double max);
   double Gauss(double mean, double sigma);
-  //double accept_reject(double,double,double);
 
   double retta();//generate random number distributed with 
   		 //p(x) = 2*(1-x)
@@ -36,7 +35,7 @@ public:
  					     //in a random direction in 3D space 
    };
 
-Random random_initialization();
+Random random_initialization(int);
 
 double error(vector<double>,vector<double>,int);//useful to evaluate the standard
 						//deviation mean in the blocking method
@@ -81,12 +80,12 @@ template <typename T>
 vector<T> sum_vector(vector<T>,vector<T>);
 
 template <typename T>
-void print(vector<T>);
+void print(vector<T>);//print on terminal
 
 vector<double> last_data_from_datablocking(int,vector<double>,double);
 //do the same thing as function data_blocking, but returns the last values for sum_prog and err_prog
 
-void sqrt_variance_RW (Random&,int,int,int,string); //passing random generator, number of total simulations, number of blocks for data_blocking,
+void sqrt_variance_RW (Random&,int,int,int,string,int); //passing random generator, number of total simulations, number of blocks for data_blocking,
 //number of steps for each simulation, file to save the data, int to decide if you want to
 //generate a discrete RW (value 0) or a continue RW (value 1)
  

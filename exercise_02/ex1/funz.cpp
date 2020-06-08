@@ -65,15 +65,6 @@ void Random :: SetRandom(int * s, int p1, int p2){
   return;
 };
 
-/*
-double Random :: accept_reject(double xmin=0, double xmax=1, double pmax=1) {
-
-	double x = Rannyu(xmin,xmax);
-	double r = Rannyu(); 
-	if ( r < (p(x)/pmax ) return x;
-	else return accept_reject();
-};	
-*/
 double Random :: retta() {
 	return 1.-sqrt(1.-Rannyu());
 };
@@ -90,14 +81,15 @@ vector<double> Random :: random_direction_3D(double step = 1.) {
  return x;
 };
 		
-Random random_initialization() {
+Random random_initialization(int lettura) {
 
    Random rnd;
    int seed[4];
    int p1, p2;
    ifstream Primes("Primes");
    if (Primes.is_open()){
-      Primes >> p1 >> p2 ;
+      for (int i =0;i<lettura;i++)
+      	Primes >> p1 >> p2 ;
    } else cerr << "PROBLEM: Unable to open Primes" << endl;
    Primes.close();
 
@@ -195,6 +187,7 @@ return integral;//returns a vector conteining N estimates of the integral for ea
 		//using the uniform method
 };
 
+//calculate with uniform method the integral of pi/2*cos(pi/2x) in [0,lint]
 double uniform_I(Random& rnd, int M,double lint=1.) {
  	double sum=0;
 	for (int i=0;i<M;i++) sum+=M_PI/2. * cos(M_PI/2. *rnd.Rannyu(0.,lint));
@@ -203,7 +196,6 @@ double uniform_I(Random& rnd, int M,double lint=1.) {
 
 //devo pensare a una funzione che può assomigliare a cos(x)
 //nell'intervallo che sto guardando. va bene tipo PI/2*(1-x)
-//devo pensare al disegno della mia funzione!
 vector<double> importance_sampling(Random& rnd,int M,int n, double lint=1.) {
 
 	vector<double> integral;
@@ -215,6 +207,7 @@ vector<double> importance_sampling(Random& rnd,int M,int n, double lint=1.) {
 return integral;
 };
 
+//calculate with importance sampling method the integral of pi/2*cos(pi/2x) in [0,lint]
 double importace_sampling_I(Random& rnd, int M,double lint=1.) {
  	double sum=0;
 	double x;
@@ -299,7 +292,7 @@ void sqrt_variance_RW (Random& rnd,int M,int N,int N_step, string file, int disc
  vector<double> data;
 
  if(discr_or_cont==0) {
- 	for (int i=0;i<M;i++) {//iterate over all simulation
+ 	for (int i=0;i<M;i++) {//iterate over all simulations
         	for(int j=0;j<N_step;j++) {//doing N_step in each simulation
                 	salva_dist.push_back( dist_vect( RW_cartesian(rnd,origin) ) );
 			//saving square distances in a vector
@@ -307,7 +300,7 @@ void sqrt_variance_RW (Random& rnd,int M,int N,int N_step, string file, int disc
          origin = {0.,0.,0.};//each simulation starts from the origin point
 	 }
  }
- else {
+ else {//same as above but contiue RW
 	for (int i=0;i<M;i++) {
         	for(int j=0;j<N_step;j++) {
                 	salva_dist.push_back( dist_vect( RW_domega_3D(rnd,origin) ) );
