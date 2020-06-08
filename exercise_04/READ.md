@@ -14,12 +14,12 @@ Da terminale bisogna dare il parametro restart:
 - posto uguale a 1 : l'eseguibile legge da config.0 e config.final le configurazioni della precedente simulazione  
   
 NOTA: la funzione input() legge solo input.dat., per cui prima di iniziare una simulazione eseguire comando:  
-cp input\input.cosa\_voglio\_simulare input.dat (nella cartella ci sono i file input che possono essere necessari)
-  
-MolDyn\_NVE.cpp : contiene il main
-MolDyn\_NVE.h dichiarazione di funzioni e variabili
-funz.cpp : implementazione delle funzioni utilizzate
-directory old\_config: sono presenti vecchie configurazioni utili di sistemi che hanno già raggiunto la temperatura target (relativa al loro file input.)  
+cp input\input.cosa\_voglio\_simulare input.dat (nella cartella input ci sono i file input che possono essere necessari)
+    
+- MolDyn\_NVE.cpp : contiene il main  
+- MolDyn\_NVE.h dichiarazione di funzioni e variabili  
+- funz.cpp : implementazione delle funzioni utilizzate  
+- directory old\_config: sono presenti vecchie configurazioni utili di sistemi che hanno già raggiunto la temperatura target (relativa al loro file input.)    
   
 l'eseguibile clean.sh rimuove i file generati dal codice, che quindi prima di essere cancellati (se utili) vanno spostati nella cartella oppurtuna per l'analisi dati  
   
@@ -28,7 +28,8 @@ questi sono necessari per decidere quale configurazione assegnare a r(t0+dt) (t0
 - restart = 0 --->   
 	- r(t0+dt) = config.fcc (configurazione reticolo fcc)  
 	- r(t0) = metodo velocità random  
-restart = 1 --->    
+  
+- restart = 1 --->    
 	- r(t0+dt) = config.0 (ultima configurazione ottenuta dalla simulazione precedente)  
 	- r(t0) = config.final (penultima configurazione ottenuta dalla simulazione precedente)  
 **config.0 e config.final vengono sovrascritti al termine di ogni simulazione**  
@@ -37,13 +38,12 @@ Per cui se al termine di una simulazione ci si accorge di aver commesso un error
 per questo motivo al termine della simulazione compare un messaggio di attenzione che dice:  
 nel caso in cui si voglia salvare le configurazioni ottenute da questa simulazione allora fare comando 
 *make copy*. questo copia config.0 in old.0, e config.final in old.final.  
-se si vuole invece copiare ripartire da una configura salvata nel file old. eseguire il comando **make oldcopy**, che copia old.0 in config.0, old.final in config.final  
+se si vuole invece ripartire da una configura salvata nel file old. eseguire il comando **make oldcopy**, che copia old.0 in config.0, old.final in config.final  
   
 ### OSSERVAZIONE IMPORTANTE
 prima di eseguire l'analisi si sono svolte simulazioni una di seguito all'altra per far raggiungere al sistema la temperatura target,cioè quella a cui si vuole studiare la fisica.     
 Per fare questo all'inizio del main è presente la parola: *equilibration*: 
-- Se questa è definita allora l'eseguibile compie un ciclo while controllando la differenza tra la temperatura target e la temperatura media raggiunta dal sistema (valutata con il metodo blocking, cioè l'ultimo valore ricavato dall'analisi dati). Se il modulo di questa differenza è entro l'errore calcolato con il metodo blocking (ho posto come condizione che debba essere dentro una sigma) allora  
-il programma esce dal while, salva (con *make copy*) la configurazione da cui si è partiti per ottenere l'equilibrazione in old.0 e old.final. Finisce la simulazione sovrascrivendo config.0 e config.final.     
+- Se questa è definita allora l'eseguibile compie un ciclo while controllando la differenza tra la temperatura target e la temperatura media raggiunta dal sistema (valutata con il metodo blocking, cioè l'ultimo valore ricavato dall'analisi dati). Se il modulo di questa differenza è entro l'errore calcolato con il metodo blocking (ho posto come condizione che debba essere dentro una sigma) allora il programma esce dal while, salva (con *make copy*) la configurazione da cui si è partiti per ottenere l'equilibrazione in old.0 e old.final. Finisce la simulazione sovrascrivendo config.0 e config.final.     
 allora per partire dalle configurazioni con cui si aveva raggiunto la temperatura target eseguo il comando *make oldcopy* e da queste configurazioni si fa partire la nuova simulazione per generare i dati di cui si vuole fare l'analisi.    
    
 verrà anche generato un file traj.xyz, utile solo per visualizzare le molecole tramite vmd, si troverà commentata questa funzione nel main  
