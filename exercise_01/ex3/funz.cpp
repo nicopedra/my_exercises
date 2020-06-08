@@ -65,14 +65,15 @@ void Random :: SetRandom(int * s, int p1, int p2){
   return;
 };
 
-Random random_initialization() {
+Random random_initialization(int lettura) {
 
    Random rnd;
    int seed[4];
    int p1, p2;
    ifstream Primes("Primes");
    if (Primes.is_open()){
-      Primes >> p1 >> p2 ;
+      for (int i=0;i<lettura;i++)
+      	Primes >> p1 >> p2 ;
    } else cerr << "PROBLEM: Unable to open Primes" << endl;
    Primes.close();
 
@@ -141,7 +142,8 @@ double genera_angolo_senzaPI (Random rnd) {
         	x=rnd.Rannyu();
         	y=rnd.Rannyu();
 	}
-        theta=asin(y/sqrt(x*x+y*y));
+        theta=asin(y/sqrt(x*x+y*y));//angle between [-Pi/2,Pi/2]
+
         return theta;
 };
 
@@ -149,19 +151,22 @@ vector<double> esperimento_Buffon(Random rnd,int n,int M, double dist_lines,doub
 
  vector<int> N_hit(n,0.);//to count the number of hits in each block
  vector<int> N_thr(n,M/n);//number of throwns in each block 
- vector<double> pi;
+ vector<double> pi;//to save result
  double y,theta;
 
  //using traslational symmetry over x and 
  //periodic symmetry over y (dist_lines) 
  //and symmetry over half circle (generating angle between -Pi/2 and Pi/2)
- for (int i=0;i<n;i++) {
-         for (int j=0;j<M/n;j++) {
+ for (int i=0;i<n;i++) {//cycle over blocks
+
+         for (int j=0;j<M/n;j++) {//throwns
+
                 y=rnd.Rannyu(0.,dist_lines);
                 theta=genera_angolo_senzaPI(rnd);
                 //theta=rnd.Rannyu(0.,2*M_PI);
                 if(y+L_needle*sin(theta) > dist_lines || y+L_needle*sin(theta) < 0) N_hit[i]++;
                 }
+
 	 pi.push_back(2*L_needle*N_thr[i]/(N_hit[i]*dist_lines));//storing a value of pi
 	 							 //for each block
         }

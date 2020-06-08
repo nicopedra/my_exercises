@@ -65,14 +65,15 @@ void Random :: SetRandom(int * s, int p1, int p2){
   return;
 };
 
-Random random_initialization() {
+Random random_initialization(int lettura) {
 
    Random rnd;
    int seed[4];
    int p1, p2;
    ifstream Primes("Primes");
    if (Primes.is_open()){
-      Primes >> p1 >> p2 ;
+      for (int i=0;i<lettura;i++)
+      	Primes >> p1 >> p2 ;
    } else cerr << "PROBLEM: Unable to open Primes" << endl;
    Primes.close();
 
@@ -93,10 +94,12 @@ Random random_initialization() {
 
 };
 
+
 double error(vector<double> AV, vector<double> AV2, int i) {
 	if (i==0) return 0;
 	else return sqrt( (AV2[i]-AV[i]*AV[i]) / double(i) );
 };
+
 
 double mean(vector<double> v,int last_index, int first_index = 0) {
 	double sum = 0;

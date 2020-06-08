@@ -4,13 +4,17 @@ using namespace std;
 
  int main () {
 //####################################################################################
- Random rnd = random_initialization(); 
+ Random rnd = random_initialization(1); 
 //####################################################################################
 
  int M=10000;//number of throwns
  int n=100;//number of blocks
  double L_needle=0.5,dist_lines=1.;
- data_blocking(n,esperimento_Buffon(rnd,n,M,dist_lines,L_needle),M_PI,"datipi.txt");
+ //doing buffon experiment with a needle
+ vector<double> stuzzicadente = esperimento_Buffon(rnd,n,M,dist_lines,L_needle);
+
+ //blocking method
+ data_blocking(n,stuzzicadente,M_PI,"datipi.txt");
 
  system("mv datipi.txt ../");
 

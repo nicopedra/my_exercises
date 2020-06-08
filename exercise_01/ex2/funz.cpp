@@ -65,7 +65,7 @@ void Random :: SetRandom(int * s, int p1, int p2){
   return;
 };
 
-double Random :: exponential_dist(double lambda = 1) { 
+double Random :: exponential_dist(double lambda = 1) {//random number with exponential dice 
                                                   
         double y = Rannyu();
         return -1/lambda*log(1-y);
@@ -78,14 +78,15 @@ double Random :: lorentzian_dist(double mu = 0 ,double gamma = 1) {//generate ra
 };
 
 
-Random random_initialization() {
+Random random_initialization(int lettura) {
 
    Random rnd;
    int seed[4];
    int p1, p2;
    ifstream Primes("Primes");
    if (Primes.is_open()){
-      Primes >> p1 >> p2 ;
+      for (int i=0;i<lettura;i++)
+      	Primes >> p1 >> p2 ;
    } else cerr << "PROBLEM: Unable to open Primes" << endl;
    Primes.close();
 

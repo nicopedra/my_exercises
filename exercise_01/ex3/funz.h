@@ -30,7 +30,7 @@ public:
   double Gauss(double mean, double sigma);
    };
 
-Random random_initialization();
+Random random_initialization(int);
 
 double error(vector<double>,vector<double>,int);//useful to evaluate the standard
 						//deviation mean in the blocking method
@@ -43,14 +43,11 @@ void print_vector(vector<double>, string);
 
 void print_matrix(vector<vector<double>>, string);
 
-template <typename T>
-double chiquadro(vector<T> observed, double expected);
-
 double genera_angolo_senzaPI (Random);//generate a uniform angle in [-PI/2,PI/2]
 
 vector<double> Buffon(Random,int,int,double,double);//simulate the Buffon experiment:
-						    //passing a random generator, number of blocks,
-						    //total throws, dist_lines and L_needle 	
+						    //passing a random generator, number of blocks for blocking,
+						    //total throwns, dist_lines and L_needle 	
 
 void data_blocking(int,vector<double>, double, string);//passing the number of blocks N, 
 						       //the vector conteining the N values calculated in each block,

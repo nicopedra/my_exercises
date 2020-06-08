@@ -35,7 +35,7 @@ public:
 
    };
 
-Random random_initialization();
+Random random_initialization(int);
 
 double error(vector<double>,vector<double>,int);//useful to evaluate the standard
 						//deviation mean in the blocking method
@@ -46,7 +46,7 @@ double dev_std_mean(vector<double>);
 
 void print_vector(vector<double>, string);
 
-void print_matrix(vector<vector<double>>, string);
+void print_matrix(vector<vector<double>>, string);//print the matrix into a file
 
 void data_blocking(int,vector<double>, double, string);//passing the number of blocks N, 
 						       //the vector conteining the N values calculated in each block,
@@ -54,8 +54,8 @@ void data_blocking(int,vector<double>, double, string);//passing the number of b
 
 void fill_hist(Random&,int,vector<vector<double>>&,vector<int>,string);
 //passing the Random generator, the number of iteration, matrix conteining the histograms,
-//the vector which tells how much random number sum in each iteration,
-//file in which save the histogram
+//the vector which tells how many random numbers sum in each iteration,
+//file in which save the histogram contents
 
 #endif 
 

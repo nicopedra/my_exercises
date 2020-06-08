@@ -4,4 +4,4 @@ compila: ex2.cpp funz.cpp funz.h
 	g++ ex2.cpp -o ex2 $(FLAGS) 
 
 clean:  
-	rm ex2.cpp
+	rm ex2
