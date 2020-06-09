@@ -48,7 +48,6 @@ double beta,temp,vol,rho,box,rcut;
 // simulation
 int nstep, nblk;
 double delta;
-//pigreco
 
 //######## Argon ##########
   //sigma = 0.34e-9;//m

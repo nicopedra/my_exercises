@@ -254,7 +254,7 @@ void Measure()
    bin = int(dr/bin_size);
    	walker[bin+igofr] = walker[bin+igofr]+2;
 
-// qui riempio le cose
+// fill potential energy and virial
      if(dr < rcut)
      {
        vij = 1.0/pow(dr,12) - 1.0/pow(dr,6);
@@ -267,8 +267,10 @@ void Measure()
     }          
   }
 
+  //fill container
   walker[iv] = 4.0 * v;
   walker[iw] = 16.0 * w;
+  //saving istantaneous values
   ofstream Pot("instepot.out",ios::app);
   ofstream Press("instpress.out",ios::app);
   Pot << walker[iv]/(double)npart+vtail << endl;
@@ -358,6 +360,7 @@ for (int k=igofr;k<n_props;k++) {
     Pres.close();
     Gofr.close();
 
+    //final values for g(r), last values for blocking in each bin
     if (iblk == nblk) {
 		for (int k=igofr;k<n_props;k++)
 				Gave << (bin_size*0.5+(k-igofr)*bin_size)<<"\t"<< glob_av[k]/(double)iblk << setw(wd) << err_gdir << endl;
@@ -367,6 +370,7 @@ for (int k=igofr;k<n_props;k++) {
 }
 
 
+//print final configuration
 void ConfFinal(void)
 {
   ofstream WriteConf;
