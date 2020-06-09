@@ -1,5 +1,5 @@
 nella cartella ex c'è il codice relativo alla quinta esercitazione.  
-è presenta anche una cartella "tentativi", necessaria per mostrare alcuni risultati iniziali tramite l'analisi svolta nello jupyter notebook.    
+è presente anche una cartella "tentativi", necessaria per mostrare alcuni risultati iniziali tramite l'analisi svolta nello jupyter notebook.    
    
 la cartella è organizzata nel seguente modo:  
 1. makefile  
