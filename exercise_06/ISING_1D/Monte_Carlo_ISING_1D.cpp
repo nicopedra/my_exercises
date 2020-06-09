@@ -239,7 +239,7 @@ void Averages(int iblk) //Print results for current block
 
     Heat.open("output.hc.0",ios::app);
     double appo = blk_av[ic]/blk_norm/(double)nspin;
-    double appo2 = nspin*blk_av[iu]*blk_av[iu]/pow(blk_norm*(double)nspin,2) ;
+    double appo2 = nspin*blk_av[iu]*blk_av[iu] / pow(blk_norm*(double)nspin,2) ;//nspin*stima_u*stima_u;
     stima_c = (appo-appo2)*beta*beta; //Heat Capacity
     glob_av[ic]  += stima_c;
     glob_av2[ic] += stima_c*stima_c;
