@@ -78,42 +78,15 @@ void Random :: SetRandom(int * s, int p1, int p2){
   return;
 };
 
-double Random :: exponential_dist(double lambda = 1) {  
-                                                  
-        double y = Rannyu();
-        return -1/lambda*log(1-y);
-};
-
-double Random :: lorentzian_dist(double mu = 0 ,double gamma = 1) {
-                                                          
-        double y = Rannyu();
-        return gamma*tan(M_PI*(y-0.5))+mu;
-};
-
-double Random :: retta() {
-	return 1.-sqrt(1.-Rannyu());
-};
-
-vector<double> Random :: random_direction_3D(double step = 1.) {
-
-        double theta = acos(1-2*Rannyu());
-        double phi = Rannyu(0.,2*M_PI);
-	vector<double> x;
-	x.push_back(step*sin(theta)*cos(phi));
-	x.push_back(step*sin(theta)*sin(phi));
-	x.push_back(step*cos(theta));
-
- return x;
-};
-		
-Random random_initialization() {
+Random random_initialization(int lettura) {
 
    Random rnd;
    int seed[4];
    int p1, p2;
    ifstream Primes("Primes");
    if (Primes.is_open()){
-      Primes >> p1 >> p2 ;
+      for (int i=0;i<lettura;i++)
+      	Primes >> p1 >> p2 ;
    } else cerr << "PROBLEM: Unable to open Primes" << endl;
    Primes.close();
 
@@ -152,21 +125,6 @@ void print_vector(vector<double> v, string file) {
 	fd.close();
 };
 
-void print_matrix(vector<vector<double>> m, string file) {
-	fstream fd;
-	fd.open(file,ios::out);
-	int n_row = m[0].size();
-       	int n_col = m.size();
-	for (int j=0;j<n_row;j++){
-		for (int i=0; i<n_col; i++) {
-			fd << m[i][j] << " ";
-		}
-		fd << endl;
-	}
-				
-	fd.close();
-};
-
 void data_blocking(int N,vector<double> simulation_value, double real_value, string file) {
  
  vector<double> err_prog;
@@ -193,55 +151,9 @@ void data_blocking(int N,vector<double> simulation_value, double real_value, str
 
 };
 
-double dist_vect(vector<double> x,vector<double> y = {0,0,0}) {
-          
-	double sum=0;
-        if(x.size() != y.size()) return -1;
-	else for (int i=0; i<x.size();i++) sum+=(x[i]-y[i])*(x[i]-y[i]);
-	return sum;
-};
-
-double dist(vector<double> x,vector<double> y={0,0,0}) {
-	return sqrt(dist_vect(x,y));
-};
-
-template <typename T>
-vector<T> sum_vector(vector<T> x,vector<T> y) {
-
-	vector<T> sum;
-	if(x.size() != y.size()) cout << "error: they must have the same dimension" << "\n";
-	else for (int i=0;i<x.size();i++) sum.push_back(x[i]+y[i]);
-
-	return sum;
-};
-
 template <typename T>
 void print(vector<T> v) {
 	for (auto el : v) cout << el << "\n";
-};
-
-vector<double> last_data_from_datablocking(int N,vector<double> simulation_value, double real_value= 0.) {
-
- vector<double> err_prog;
- vector<double> sum_prog(N,0.);
- vector<double> simulation_value2;
- vector<double> su2_prog(N,0.);
-
- for (int i=0;i<N;i++) simulation_value2.push_back(simulation_value[i]*simulation_value[i]);
-
- for (int i=0; i<N; i++) {
-         for (int j=0; j<i+1; j++) {
-                 sum_prog[i] += simulation_value[j];
-                 su2_prog[i] += simulation_value2[j];
-         }
-         sum_prog[i]/=(i+1);
-         su2_prog[i]/=(i+1);
-         err_prog.push_back(error(sum_prog,su2_prog,i));
- }
-  
- vector<double> data = {sum_prog[N-1],err_prog[N-1]};
-
-	return data;
 };
 
 double psi_100_square (vec cart_coord) {//ho messo a_0 davanti per non scalare dopo e avere tutto adimensionale
@@ -252,7 +164,7 @@ double psi_100_square (vec cart_coord) {//ho messo a_0 davanti per non scalare d
 
 double psi_210_square (vec cart_coord) {
 	
-	return pow(a_0,-5)/(32*M_PI)*norm(cart_coord)*norm(cart_coord)*exp(-norm(cart_coord)/a_0)*(cart_coord[0]/norm(cart_coord))*(cart_coord[0]/norm(cart_coord));
+	return pow(a_0,-5)/(32*M_PI)*norm(cart_coord)*norm(cart_coord)*exp(-norm(cart_coord)/a_0)*(cart_coord[2]/norm(cart_coord))*(cart_coord[2]/norm(cart_coord));
 
 };
 
@@ -270,51 +182,72 @@ double A_psi210 (vec init_x, vec new_x) {
 
 };
 
+
 void Metropolis_uniform(Random& rnd,int iterations,int N,double delta) {
 
+ //number of throwns per each block
  int L = iterations/N;	
+ //useful for saving positions and then plotting point in 3D space
  mat campionamenti; campionamenti.zeros(iterations,3);
+ //for saving istantaneous values of <r>
  vector<double> r;
+ //for data blocking, <r> per each block
  vector<double> r_mean;
+ //saving stuff on file
  fstream fd;
-
+ //initial point
  vec init_x = {0.,0.,0.};
+ //to store the new move
  vec new_x;
  
- for (uword i=0;i<iterations;i++) {
+ for (uword i=0;i<iterations;i++) { //cycle over all iterations
+	//saving coordinates
 	campionamenti.row(i) = init_x.t();
+	//new move 
  	new_x = rnd.Rannyu3D_center(init_x,delta);
+		//heart of Metropolis algorithm
  		if (rnd.Rannyu()<=A_psi100(init_x,new_x)) init_x = new_x;
+	//saving istantaneous (and normalized) values
 	r.push_back(norm(init_x/a_0));
  }
 
+ //blocking analysis
  for (uword i=0;i<N;i++) 
 	 r_mean.push_back( mean(r, (i+1)*L, i*L )); 
  data_blocking(N,r_mean,1.5,"r100.txt");
-
+ // print istantaneous values
  print_vector(r,"r100all.txt");
-
+ // print
  campionamenti.row(iterations-1) = init_x.t();
  campionamenti = campionamenti/a_0;
  fd.open("campionamenti100.txt",ios::out);
  campionamenti.print(fd);
  fd.close();
 
+ //clean all 
  r.clear();
  r_mean.clear();
  campionamenti.zeros(iterations,3);
+ //new initial point for psi_210
  init_x = {a_0/2.,a_0/2.,a_0/2.};
+
+ //Metropolis sampling
  for (uword i=0;i<iterations;i++) {
+
 	campionamenti.row(i) = init_x.t();
  	new_x = rnd.Rannyu3D_center(init_x,delta);
+
  		if (rnd.Rannyu()<=A_psi210(init_x,new_x)) init_x = new_x;
+
 	r.push_back(norm(init_x/a_0));
  }
 
+ //data blocking
  for (uword i=0;i<N;i++) 
 	 r_mean.push_back( mean(r, (i+1)*L, i*L )); 
  data_blocking(N,r_mean,5,"r210.txt");
 
+ //saving results
  print_vector(r,"r210all.txt");
 
  campionamenti.row(iterations-1) = init_x.t();
@@ -324,6 +257,7 @@ void Metropolis_uniform(Random& rnd,int iterations,int N,double delta) {
  fd.close();
 };
 
+//the same as above, but with gaussian T(x|y)
 void Metropolis_gauss(Random& rnd,int iterations,int N,double delta) {
 
  int L = iterations/N;	
