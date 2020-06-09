@@ -1,9 +1,9 @@
 50
 1.0
+0.02
 0
-1
-100
-10000
+50
+1000
 
   ReadInput >> nspin;
   ReadInput >> J;

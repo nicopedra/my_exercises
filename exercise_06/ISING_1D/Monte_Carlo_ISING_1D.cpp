@@ -133,7 +133,6 @@ void Move(int metro)
   int o;
   double p, energy_old, energy_new, sm;
   double r,rr;
-  double energy_up, energy_down;
 
   for(int i=0; i<nspin; ++i)
   {
@@ -176,7 +175,6 @@ void Measure()
   {
      u += -J * s[i] * s[Pbc(i+1)] - 0.5 * h * (s[i] + s[Pbc(i+1)]);//calcolo qui u^2
      m += s[i];     //poi dopo in averages calcolo la capacità termica
-// INCLUDE YOUR CODE HERE
   }
   u2 = u*u;
   chi = m*m;
@@ -187,7 +185,6 @@ void Measure()
   ofstream Ene("inst_ene.out",ios::app);
   Ene << u/(double)nspin << endl;
   Ene.close();
-// INCLUDE YOUR CODE HERE
 }
 
 void Reset(int iblk) //Reset block averages
