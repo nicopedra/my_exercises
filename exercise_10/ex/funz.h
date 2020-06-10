@@ -40,7 +40,6 @@ public:
   void SaveSeed();
   double Rannyu(void);
   double Rannyu(double min, double max);
-  double Rannyu1D_center(double,double);//T(x|x') uniform, centered in vec
   double Gauss(double mean, double sigma);
    };
 
@@ -57,9 +56,6 @@ T square_norm (InputIt1,InputIt1,T);
 
 template <typename T>
 void shift_vector(vector<T>&,int,int); 
-
-template <typename T>
-vector<T> minus_vec(vector<T>,vector<T>);
 
 double cost_function(vector<int>); 
 void picture_path(vector<int>,string);
@@ -81,27 +77,13 @@ void initialize_circon(Random&,int);
 
 void initialize_square(Random&,int);
 
-double error(vector<double>,vector<double>,int);//useful to evaluate the standard
-						//deviation mean in the blocking method
-
 double mean(vector<double>,int,int);
 
 template <typename T>
 void print_vector(vector<T>);
 
-void data_blocking(int,vector<double>, double, string);//passing the number of blocks N, 
-                                                       //the vector conteining the N values calculated in each block,
-                                                       //the reale value, and the name of the file 
-						       //in which save the results
-
-template <typename T>
-vector<T> sum_vector(vector<T>,vector<T>);
-
 template <typename T>
 void print(vector<T>);
-
-vector<double> last_data_from_datablocking(int,vector<double>);
-//do the same thing as function data_blocking, but returns the last values for sum_prog and err_prog
 
 #endif 
 

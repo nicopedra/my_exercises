@@ -43,13 +43,11 @@ using namespace arma;
 	 beta.push_back(1/j);
 	 i++;
  }
- //for (double i = 2.;i>=0.0002;i-=0.0002) beta.push_back(1./i);//per quadrato
- //cout << beta.size() << endl;
- //print_vector(beta);
  
  ofstream best_beta("beta_path.txt");
   for (auto& el : beta) {
 	it ++;
+	//MC steps
 	single_MC_SA(rnd,el,N,path);
 	if (it%10 == 0) {
 		cout << "--------------------------------------" << endl;

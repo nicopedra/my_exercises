@@ -26,12 +26,6 @@ double Random :: Rannyu(double min, double max){
    return min+(max-min)*Rannyu();
 };
 
-double Random :: Rannyu1D_center(double x,double delta = 1.) {
-   double x_new;
-   x_new = x + Rannyu(-1.,1.)*delta;
-   return x_new;
-};
-
 double Random :: Rannyu(void){
   const double twom12=0.000244140625;
   int i1,i2,i3,i4;
@@ -79,19 +73,22 @@ if (if_square)
 	seed = (rank+1);
 else
 	seed = 10*(rank+1);
+
  rnd = random_initialization(seed);
  it = 0;
  accepted = 0; attempted = 0;
+
  for (int i=0;i<genes;i++)
 		start_chromo.push_back(i);
  simple_chromo = start_chromo;
+ //per avere ognuno una popolazione iniziale leggermente diversa dagli altri
  double p = 1./double(rank+2);
  double r=rnd.Rannyu();
  while (r<p) { 
  	random_shuffle(start_chromo.begin()+1,start_chromo.end()); 
         r = rnd.Rannyu();
  }
- //attempted = 0; accepted = 0; 
+ //fill population
  int i = 0;
  while (i<size) {
 	chromosomes.push_back(start_chromo); 
@@ -332,7 +329,7 @@ void shift_vector(vector<T> &v, int m,int n) {
 	}
 }
 
-Random random_initialization(int lettura = 0) {
+Random random_initialization(int lettura = 1) {
 
    Random rnd;
    int seed[4];
@@ -386,11 +383,6 @@ void initialize_square(Random& rnd,int cities) {
 
 }
 
-double error(vector<double> AV, vector<double> AV2, int i) {
-	if (i==0) return 0;
-	else return sqrt( (AV2[i]-AV[i]*AV[i]) / double(i) );
-};
-
 double mean(vector<double> v,int last_index, int first_index = 0) {
 	double sum = 0;
 	for (int i=first_index; i<last_index; i++) sum += v[i];
@@ -405,82 +397,8 @@ void print_vector(vector<T> v) {
 	cout << endl;
 };
 
-void print_matrix(vector<vector<double>> m, string file) {
-	fstream fd;
-	fd.open(file,ios::out);
-	int n_row = m[0].size();
-       	int n_col = m.size();
-	for (int j=0;j<n_row;j++){
-		for (int i=0; i<n_col; i++) {
-			fd << m[i][j] << " ";
-		}
-		fd << endl;
-	}
-				
-	fd.close();
-};
-
-void data_blocking(int N,vector<double> simulation_value, double real_value, string file) {
- 
- vector<double> err_prog;
- vector<double> sum_prog(N,0.);
- vector<double> simulation_value2;
- vector<double> su2_prog(N,0.);
-
- for (int i=0;i<N;i++) simulation_value2.push_back(simulation_value[i]*simulation_value[i]);
-
- for (int i=0; i<N; i++) {
-         for (int j=0; j<i+1; j++) {
-                 sum_prog[i] += simulation_value[j];
-                 su2_prog[i] += simulation_value2[j];
-         }
-         sum_prog[i]/=(i+1);
-         su2_prog[i]/=(i+1);
-         err_prog.push_back(error(sum_prog,su2_prog,i));
- }
-
-         fstream fd;
-         fd.open(file,ios::out);
-         for (int i=0; i<N;i++) fd << sum_prog[i]-real_value<<" "<< err_prog[i] << endl;
-         fd.close();
-
-};
-
-template <typename T>
-vector<T> sum_vector(vector<T> x,vector<T> y) {
-
-	vector<T> sum;
-	if(x.size() != y.size()) cout << "error: they must have the same dimension" << "\n";
-	else for (int i=0;i<x.size();i++) sum.push_back(x[i]+y[i]);
-
-	return sum;
-};
-
 template <typename T>
 void print(vector<T> v) {
 	for (auto el : v) cout << el << "\n";
 };
 
-vector<double> last_data_from_datablocking(int N,vector<double> simulation_value) {
-
- vector<double> err_prog;
- vector<double> sum_prog(N,0.);
- vector<double> simulation_value2;
- vector<double> su2_prog(N,0.);
-
- for (int i=0;i<N;i++) simulation_value2.push_back(simulation_value[i]*simulation_value[i]);
-
- for (int i=0; i<N; i++) {
-         for (int j=0; j<i+1; j++) {
-                 sum_prog[i] += simulation_value[j];
-                 su2_prog[i] += simulation_value2[j];
-         }
-         sum_prog[i]/=(i+1);
-         su2_prog[i]/=(i+1);
-         err_prog.push_back(error(sum_prog,su2_prog,i));
- }
-  
- vector<double> data = {sum_prog[N-1],err_prog[N-1]};
-
-	return data;
-};

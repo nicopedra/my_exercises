@@ -28,11 +28,6 @@ double Random :: Rannyu(double min, double max){
    return min+(max-min)*Rannyu();
 };
 
-double Random :: Rannyu1D_center(double x,double delta = 1.) {
-   double x_new;
-   x_new = x + Rannyu(-1.,1.)*delta;
-   return x_new;
-};
 
 double Random :: Rannyu(void){
   const double twom12=0.000244140625;
@@ -80,6 +75,8 @@ void single_MC_SA (Random& rnd,double beta, int n,vector<int>& path) {
 	vector<int> old_path;
 	double r;
 	for (int i =0;i<n;i++) {
+
+		//Metropolis
 		old_path = path;
 		L_old = cost_function(path);
 		Mutation(rnd,path);
@@ -92,6 +89,7 @@ void single_MC_SA (Random& rnd,double beta, int n,vector<int>& path) {
 			refused++;
 		}
 		attempted++;
+		//saving path
 	     if(i%10 == 0) {
 		     Best << nconf  << "\t" << cost_function(path) << endl;
 		     nconf++;
@@ -205,7 +203,7 @@ void shift_vector(vector<T> &v, int m,int n) {
 	}
 }
 
-Random random_initialization(int lettura = 0) {
+Random random_initialization(int lettura = 1) {
 
    Random rnd;
    int seed[4];
@@ -259,12 +257,6 @@ void initialize_square(Random& rnd,int cities) {
 
 }
 
-
-double error(vector<double> AV, vector<double> AV2, int i) {
-	if (i==0) return 0;
-	else return sqrt( (AV2[i]-AV[i]*AV[i]) / double(i) );
-};
-
 double mean(vector<double> v,int last_index, int first_index = 0) {
 	double sum = 0;
 	for (int i=first_index; i<last_index; i++) sum += v[i];
@@ -279,82 +271,8 @@ void print_vector(vector<T> v) {
 	cout << endl;
 };
 
-void print_matrix(vector<vector<double>> m, string file) {
-	fstream fd;
-	fd.open(file,ios::out);
-	int n_row = m[0].size();
-       	int n_col = m.size();
-	for (int j=0;j<n_row;j++){
-		for (int i=0; i<n_col; i++) {
-			fd << m[i][j] << " ";
-		}
-		fd << endl;
-	}
-				
-	fd.close();
-};
-
-void data_blocking(int N,vector<double> simulation_value, double real_value, string file) {
- 
- vector<double> err_prog;
- vector<double> sum_prog(N,0.);
- vector<double> simulation_value2;
- vector<double> su2_prog(N,0.);
-
- for (int i=0;i<N;i++) simulation_value2.push_back(simulation_value[i]*simulation_value[i]);
-
- for (int i=0; i<N; i++) {
-         for (int j=0; j<i+1; j++) {
-                 sum_prog[i] += simulation_value[j];
-                 su2_prog[i] += simulation_value2[j];
-         }
-         sum_prog[i]/=(i+1);
-         su2_prog[i]/=(i+1);
-         err_prog.push_back(error(sum_prog,su2_prog,i));
- }
-
-         fstream fd;
-         fd.open(file,ios::out);
-         for (int i=0; i<N;i++) fd << sum_prog[i]-real_value<<" "<< err_prog[i] << endl;
-         fd.close();
-
-};
-
-template <typename T>
-vector<T> sum_vector(vector<T> x,vector<T> y) {
-
-	vector<T> sum;
-	if(x.size() != y.size()) cout << "error: they must have the same dimension" << "\n";
-	else for (int i=0;i<x.size();i++) sum.push_back(x[i]+y[i]);
-
-	return sum;
-};
-
 template <typename T>
 void print(vector<T> v) {
 	for (auto el : v) cout << el << "\n";
 };
 
-vector<double> last_data_from_datablocking(int N,vector<double> simulation_value) {
-
- vector<double> err_prog;
- vector<double> sum_prog(N,0.);
- vector<double> simulation_value2;
- vector<double> su2_prog(N,0.);
-
- for (int i=0;i<N;i++) simulation_value2.push_back(simulation_value[i]*simulation_value[i]);
-
- for (int i=0; i<N; i++) {
-         for (int j=0; j<i+1; j++) {
-                 sum_prog[i] += simulation_value[j];
-                 su2_prog[i] += simulation_value2[j];
-         }
-         sum_prog[i]/=(i+1);
-         su2_prog[i]/=(i+1);
-         err_prog.push_back(error(sum_prog,su2_prog,i));
- }
-  
- vector<double> data = {sum_prog[N-1],err_prog[N-1]};
-
-	return data;
-};

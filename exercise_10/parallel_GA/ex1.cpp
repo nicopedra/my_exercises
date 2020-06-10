@@ -5,7 +5,7 @@
 
 #include "funz.cpp"
 
-//#define square
+#define square
 //se voglio usare solo p=1 non uso swap
 #define swap
 
@@ -14,12 +14,12 @@ using namespace std;
  int main (int argc, char *argv[]) {
 //###########################################################
 //################################# EXERCISE 1 ##################
- iterations=20000;//10'000 deve andare bene
+ iterations=20000;
  int cities = 32;
  Random rnd = random_initialization(2);
  int size_population = cities;
  
- N_migr = 200;//ogni 10 generazioni 
+ N_migr = 200; 
 #ifdef square
  if_square = true;
  initialize_square(rnd,cities);
@@ -44,6 +44,7 @@ using namespace std;
  vector<int> best_b(cities);
 
  P.fill_initial_population(rank);
+ P.order_chrom();
 
  if (rank == 0 ) {
 		cout << "---------------------------------------" << endl;
@@ -68,15 +69,13 @@ using namespace std;
 		cout << "iterazione numero: " << i << endl;
 		cout << "***************************" << endl;
 	}
-	 //order
-	 P.order_chrom();
 	//migration
 #ifdef swap
 //scambio dei migliori tra 2 nodi scelti random	
 	if(i%N_migr == 0){
-		//scelgo random il primo nodo (a) che manda il suo migliore
+		//scelgo random il primo nodo (a)
 		rank_a = int(rnd.Rannyu(0.,processes));
-		//scelgo quello che riceve (b)
+		//scelgo il secondo nodo (b)
 		rank_b = int(rnd.Rannyu(0.,processes));
 		//diverso da (a)
 		while (rank_b == rank_a) {
@@ -97,7 +96,7 @@ using namespace std;
 			best_b = P.get_chromo(0);
 			MPI_Send(&best_b[0],cities,MPI_INTEGER,rank_a,itag,MPI_COMM_WORLD);
 			MPI_Recv(&best_a[0],cities,MPI_INTEGER,rank_a,itag,MPI_COMM_WORLD,&stat);
-			P.scambio(best_a); //ora mandato contiene il migliore di receive_rank
+			P.scambio(best_a); 
 		}
 		P.order_chrom();
 	}
@@ -115,7 +114,6 @@ P.order_chrom();
 P.print_average_path();
 P.print_best_path();
 P.print_result(rank);
-//cout << "sono il nodo " << rank << endl;
 
 picture_path(P.get_chromo(0),"picture_path"+to_string(rank)+".txt");
 

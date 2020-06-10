@@ -53,14 +53,16 @@ private:
 	int genes;//quanti geni ci sono dentro un cromosoma, 
 	           //pari al numero di città in questo caso specifico
 	vector<vector<int>> chromosomes;
+	//new child from crossover
 	vector<int> new_child_one;
 	vector<int> new_child_two;
+	//probability for selection
 	double total_fitness;
 	vector<double> fitness;
 	bool crossv;
 	vector<int> start_chromo;
 	vector<vector<int>> the_BigFour;
-	vector<double> Path;
+	vector<double> Path;//per salvare dei risultati
 	vector<double> Best_Path;
 	double p_m;//probability mutation
 	double p_c;//probability crossover 
@@ -85,20 +87,20 @@ public:
   vector<int> get_theRealOne(int i) {return the_BigFour[i];}
   int get_gene_chromo(int j,int i) {return chromosomes[i][j];}
   void fill_initial_population(int);//popolazione iniziale
-  void selection();
-  void order_chrom();
-  void crossover();
-  void mutation(vector<int>&);
+  void selection();//selection algorithm
+  void order_chrom();//order population
+  void crossover(); //crossover
+  void mutation(vector<int>&); //mutation
   void print_population(); 
   double mean_cost();
   void print_average_path(); 
   void print_best_path();
-  void update();
-  void check_function (vector<int>);
-  void scambio(vector<int>&);
+  void update();//update population
+  void check_function (vector<int>); //check function
+  void scambio(vector<int>&);// swap contents of two different paths
   void Exit();
-  void best_list(vector<int>);
-  void print_result(int);
+  void best_list(vector<int>);//put the best in BIG_FOUR
+  void print_result(int);//print contents of Path and Best_Path on file
  };
 
 template <class InputIt1,class T>
@@ -121,27 +123,13 @@ void initialize_circon(Random&,int);
 
 void initialize_square(Random&,int);
 
-double error(vector<double>,vector<double>,int);//useful to evaluate the standard
-						//deviation mean in the blocking method
-
 double mean(vector<double>,int,int);
 
 template <typename T>
 void print_vector(vector<T>);
 
-void data_blocking(int,vector<double>, double, string);//passing the number of blocks N, 
-                                                       //the vector conteining the N values calculated in each block,
-                                                       //the reale value, and the name of the file 
-						       //in which save the results
-
-template <typename T>
-vector<T> sum_vector(vector<T>,vector<T>);
-
 template <typename T>
 void print(vector<T>);
-
-vector<double> last_data_from_datablocking(int,vector<double>);
-//do the same thing as function data_blocking, but returns the last values for sum_prog and err_prog
 
 #endif 
 
