@@ -34,20 +34,6 @@ double Random :: Rannyu1D_center(double x,double delta = 1.) {
    return x_new;
 };
 
-
-
-vec Random :: Rannyu3D_center(vec x,double delta = 1.) {
-   vec x_new(x.size());
-   for (uword i=0;i<x.size();i++) x_new[i]= x[i]+Rannyu(-1.,1.)*delta;
-   return x_new;
-};
-
-vec Random :: Rannyu3D_gauss(vec x,double delta = 1.) {
-   vec x_new(x.size());
-   for (uword i=0;i<x.size();i++) x_new[i]= Gauss(x[i],delta);
-   return x_new;
-};
-
 double Random :: Rannyu(void){
   const double twom12=0.000244140625;
   int i1,i2,i3,i4;
@@ -86,42 +72,15 @@ void Random :: SetRandom(int * s, int p1, int p2){
   return;
 };
 
-double Random :: exponential_dist(double lambda = 1) {  
-                                                  
-        double y = Rannyu();
-        return -1/lambda*log(1-y);
-};
-
-double Random :: lorentzian_dist(double mu = 0 ,double gamma = 1) {
-                                                          
-        double y = Rannyu();
-        return gamma*tan(M_PI*(y-0.5))+mu;
-};
-
-double Random :: retta() {
-	return 1.-sqrt(1.-Rannyu());
-};
-
-vector<double> Random :: random_direction_3D(double step = 1.) {
-
-        double theta = acos(1-2*Rannyu());
-        double phi = Rannyu(0.,2*M_PI);
-	vector<double> x;
-	x.push_back(step*sin(theta)*cos(phi));
-	x.push_back(step*sin(theta)*sin(phi));
-	x.push_back(step*cos(theta));
-
- return x;
-};
-		
-Random random_initialization() {
+Random random_initialization(int lettura) {
 
    Random rnd;
    int seed[4];
    int p1, p2;
    ifstream Primes("Primes");
    if (Primes.is_open()){
-      Primes >> p1 >> p2 ;
+      for (int i=0;i<lettura;i++)
+      	Primes >> p1 >> p2 ;
    } else cerr << "PROBLEM: Unable to open Primes" << endl;
    Primes.close();
 
@@ -160,20 +119,6 @@ void print_vector(vector<double> v, string file) {
 	fd.close();
 };
 
-void print_matrix(vector<vector<double>> m, string file) {
-	fstream fd;
-	fd.open(file,ios::out);
-	int n_row = m[0].size();
-       	int n_col = m.size();
-	for (int j=0;j<n_row;j++){
-		for (int i=0; i<n_col; i++) {
-			fd << m[i][j] << " ";
-		}
-		fd << endl;
-	}
-				
-	fd.close();
-};
 
 void data_blocking(int N,vector<double> simulation_value, double real_value, string file) {
  
@@ -201,15 +146,6 @@ void data_blocking(int N,vector<double> simulation_value, double real_value, str
 
 };
 
-template <typename T>
-vector<T> sum_vector(vector<T> x,vector<T> y) {
-
-	vector<T> sum;
-	if(x.size() != y.size()) cout << "error: they must have the same dimension" << "\n";
-	else for (int i=0;i<x.size();i++) sum.push_back(x[i]+y[i]);
-
-	return sum;
-};
 
 template <typename T>
 void print(vector<T> v) {
@@ -291,7 +227,7 @@ void Metropolis(Random& rnd,int iterations,int N,double delta) {
  vector<double> H;
  vector<double> H_mean;
  fstream fd;
- double mu0 = 1; //mi servono punti iniziali possibili
+ double mu0 = sqrt(5./4.); //mi servono punti iniziali possibili
  double sigma0 = 1;
  double mu,sigma;
  double error;
@@ -309,13 +245,26 @@ void Metropolis(Random& rnd,int iterations,int N,double delta) {
  //mu sicuramente tra 0.5 e 1.. sigma sicuramente non meno di 0.3 e non più di 1
 
  //ricerca del minimo di <H(mu,sigma)>_psitrial
- for (int l=0;l<15;l++){
- 	for (int k=0;k<15;k++) {
-		sigma = sigma0*( rnd.Rannyu()+0.5);//vario sigma e mu a partire da punti ragionevoli
+ for (int l=0;l<20;l++){
+
+	if (l % 5 == 0) cout << "ricerca numero " << l*20 << endl;
+
+ 	for (int k=0;k<20;k++) {
+
+		sigma = sigma0*( rnd.Rannyu()+0.3);//vario sigma e mu a partire da punti ragionevoli
 		mu = mu0*rnd.Rannyu();
 		attempted =0; accepted =0;
 		init_x = 0;
 		//Metropolis
+		//equlibration
+		for (uword i=0;i<1000;i++) {
+ 			new_x = rnd.Rannyu1D_center(init_x,delta);
+ 				if (rnd.Rannyu() < A_psi_T(init_x,new_x,mu,sigma)) { 
+					init_x = new_x;
+					accepted++;
+				}
+			attempted++;
+		}
  		for (uword i=0;i<iterations;i++) {
  			new_x = rnd.Rannyu1D_center(init_x,delta);
  				if (rnd.Rannyu() < A_psi_T(init_x,new_x,mu,sigma)) { 
@@ -347,10 +296,9 @@ cout << endl;
 cout << endl;
 
 cout << "#########################################################" << endl;
-cout << "E_min: " << H_old << endl;
-cout << "con errore= " << error << endl;
 ofstream Para("par.txt");
 Para << parameters[0] << " " << endl << parameters[1] << endl;
+cout << "parametri trovati: " << endl;
 cout << "mu = " << parameters[0] << " , sigma = " << parameters[1] << endl;
 // ORA USO I PARAMETRI TROVATI PER ANALIZZARE MEGLIO L'ENERGIA TROVATA 
 		cout << endl;
@@ -358,6 +306,16 @@ cout << "mu = " << parameters[0] << " , sigma = " << parameters[1] << endl;
 		mu = parameters[0];
 		attempted =0; accepted =0;
 		init_x = 0;
+		//Metropolis
+		//equilibration
+		for (uword i=0;i<1000;i++) {
+ 			new_x = rnd.Rannyu1D_center(init_x,delta);
+ 				if (rnd.Rannyu() < A_psi_T(init_x,new_x,mu,sigma)) { 
+					init_x = new_x;
+					accepted++;
+				}
+			attempted++;
+		}
  		for (uword i=0;i<iterations;i++) {
  			new_x = rnd.Rannyu1D_center(init_x,delta);
  				if (rnd.Rannyu() < A_psi_T(init_x,new_x,mu,sigma)) { 
