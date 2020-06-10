@@ -3,7 +3,7 @@
 using namespace std;
 using namespace arma;
 
-#define square
+//#define square
 
  int main (int argc, char *argv[]) {
 //###########################################################
@@ -46,6 +46,7 @@ using namespace arma;
  cout << "number of iterations: " << iterations << endl;
  wall_clock timer;
  timer.tic();
+ P.order_chrom();
 
  for (it = 0;it<iterations;it++) {
 	if (it % iprint == 0) { 
@@ -53,8 +54,6 @@ using namespace arma;
 		cout << "iterazione numero: " << it << endl;
         	cout << " ----------------------" << endl;
 	}
-	 //order
-	 P.order_chrom();
 	 //printing fitness
 	 P.print_average_path();
 	 P.print_best_path();

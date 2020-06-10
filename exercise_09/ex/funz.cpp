@@ -2,7 +2,6 @@
 
 
 using namespace std;
-using namespace arma;
 
 Random :: Random(){};
 Random :: ~Random(){};
@@ -26,12 +25,6 @@ double Random :: Gauss(double mean, double sigma) {
 
 double Random :: Rannyu(double min, double max){
    return min+(max-min)*Rannyu();
-};
-
-double Random :: Rannyu1D_center(double x,double delta = 1.) {
-   double x_new;
-   x_new = x + Rannyu(-1.,1.)*delta;
-   return x_new;
 };
 
 double Random :: Rannyu(void){
@@ -102,11 +95,13 @@ void Population :: fill_initial_population() {
 
 void Population :: selection(Random& rnd) {
 
+//assegno una probabilità
 for (auto& el : chromosomes) fitness.push_back(1./cost_function(el));
 	total_fitness = accumulate(fitness.begin(),fitness.end(),0.);
 
 double r;
 
+//ciclo per cercare padre e madre
 for (;;) {
 	mother = int(rnd.Rannyu(0,size));
 	r = rnd.Rannyu();
@@ -134,7 +129,7 @@ crossv = false;
 if (r < p_c) {
 	crossv = true;
 	accepted++;
-
+		//all'inizio avevo pensato di porre il taglio in modo casuale
 		taglio = genes*0.5;
 		for (int i = 0;i<taglio;i++) {
 			new_child_one[i] = chromosomes[father][i];
@@ -145,16 +140,21 @@ if (r < p_c) {
 		bool equal_mother;
 	        int j_mother = 0;
 		int j_father = 0;
-
+	
+		//ciclo sugli elementi dei genitori
 		for (int i=0;i<genes;i++) {
-
+		
+		//booleani per capire quali elementi sono diversi 
 		equal_father = false;
 		equal_mother = false;
+		//ciclo sugli elementi del figlio che viene dal padre per farli confrontare con quelli che vengono dalla madre
 		          for (int k = 0;k<taglio+j_mother;k++) 
 		  			if ( chromosomes[mother][i] == new_child_one[k] ) equal_mother = true;
+			  //viceversa
 		  	  for (int k = 0;k<taglio+j_father;k++)  
 					if ( chromosomes[father][i] == new_child_two[k] ) equal_father = true;
 			  	
+			  //se è rimasto false allora lo aggiungo al figlio
 			  if ( not equal_mother) {
 				  j_mother++;
 				  new_child_one[taglio-1+j_mother] = chromosomes[mother][i];
@@ -238,6 +238,7 @@ void Population :: print_best_path() {
 
 void Population :: update() {
 
+//se è avvenuto il crossover
 if (crossv) {
 
 	chromosomes.push_back(new_child_one);
@@ -310,7 +311,7 @@ void shift_vector(vector<T> &v, int m,int n) {
 	}
 }
 
-Random random_initialization(int lettura = 0) {
+Random random_initialization(int lettura = 1) {
 
    Random rnd;
    int seed[4];
@@ -364,11 +365,6 @@ void initialize_square(Random& rnd,int cities) {
 
 }
 
-double error(vector<double> AV, vector<double> AV2, int i) {
-	if (i==0) return 0;
-	else return sqrt( (AV2[i]-AV[i]*AV[i]) / double(i) );
-};
-
 double mean(vector<double> v,int last_index, int first_index = 0) {
 	double sum = 0;
 	for (int i=first_index; i<last_index; i++) sum += v[i];
@@ -383,82 +379,7 @@ void print_vector(vector<T> v) {
 	cout << endl;
 };
 
-void print_matrix(vector<vector<double>> m, string file) {
-	fstream fd;
-	fd.open(file,ios::out);
-	int n_row = m[0].size();
-       	int n_col = m.size();
-	for (int j=0;j<n_row;j++){
-		for (int i=0; i<n_col; i++) {
-			fd << m[i][j] << " ";
-		}
-		fd << endl;
-	}
-				
-	fd.close();
-};
-
-void data_blocking(int N,vector<double> simulation_value, double real_value, string file) {
- 
- vector<double> err_prog;
- vector<double> sum_prog(N,0.);
- vector<double> simulation_value2;
- vector<double> su2_prog(N,0.);
-
- for (int i=0;i<N;i++) simulation_value2.push_back(simulation_value[i]*simulation_value[i]);
-
- for (int i=0; i<N; i++) {
-         for (int j=0; j<i+1; j++) {
-                 sum_prog[i] += simulation_value[j];
-                 su2_prog[i] += simulation_value2[j];
-         }
-         sum_prog[i]/=(i+1);
-         su2_prog[i]/=(i+1);
-         err_prog.push_back(error(sum_prog,su2_prog,i));
- }
-
-         fstream fd;
-         fd.open(file,ios::out);
-         for (int i=0; i<N;i++) fd << sum_prog[i]-real_value<<" "<< err_prog[i] << endl;
-         fd.close();
-
-};
-
-template <typename T>
-vector<T> sum_vector(vector<T> x,vector<T> y) {
-
-	vector<T> sum;
-	if(x.size() != y.size()) cout << "error: they must have the same dimension" << "\n";
-	else for (int i=0;i<x.size();i++) sum.push_back(x[i]+y[i]);
-
-	return sum;
-};
-
 template <typename T>
 void print(vector<T> v) {
 	for (auto el : v) cout << el << "\n";
-};
-
-vector<double> last_data_from_datablocking(int N,vector<double> simulation_value) {
-
- vector<double> err_prog;
- vector<double> sum_prog(N,0.);
- vector<double> simulation_value2;
- vector<double> su2_prog(N,0.);
-
- for (int i=0;i<N;i++) simulation_value2.push_back(simulation_value[i]*simulation_value[i]);
-
- for (int i=0; i<N; i++) {
-         for (int j=0; j<i+1; j++) {
-                 sum_prog[i] += simulation_value[j];
-                 su2_prog[i] += simulation_value2[j];
-         }
-         sum_prog[i]/=(i+1);
-         su2_prog[i]/=(i+1);
-         err_prog.push_back(error(sum_prog,su2_prog,i));
- }
-  
- vector<double> data = {sum_prog[N-1],err_prog[N-1]};
-
-	return data;
 };
