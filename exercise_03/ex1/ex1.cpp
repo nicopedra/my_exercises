@@ -20,7 +20,9 @@ using namespace std;
 
  vector<double> v = black_scholes_analitica(S0,K,T,r,sigma);
 
+ //direct sampling
  direct_black_scholes(rnd,M,n,S0,K,T,r,sigma,v[0],v[1]);
+ //discretized delivery time
  discret_black_scholes(rnd,M,n,n_step,S0,K,T,r,sigma,v[0],v[1]);  
 
  system("mv di*  ../");

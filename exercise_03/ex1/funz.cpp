@@ -202,6 +202,7 @@ return {C,P};
 
 void direct_black_scholes(Random& rnd,int M,int n,double S0,double K,double T,double r,double sigma,double realc,double realp) {
 
+	//vectors into save results for call and put
 	vector<vector<double>> CP(2);
 	double appo;
 	double sumc, sump;
@@ -210,8 +211,8 @@ void direct_black_scholes(Random& rnd,int M,int n,double S0,double K,double T,do
 		sumc=0;sump=0;
 		for (int j=0;j<L;j++) { //inside a single block
 			appo = S0*exp((r-sigma*sigma/2.)*T + sigma*rnd.Gauss()*sqrt(T));
-			sumc+=exp(-r*T)*max(0.,appo-K);
-			sump+=exp(-r*T)*max(0.,K-appo);
+			sumc+=exp(-r*T)*max(0.,appo-K);//call
+			sump+=exp(-r*T)*max(0.,K-appo);//put
 		}
 		CP[0].push_back(sumc/L);
                 CP[1].push_back(sump/L);
