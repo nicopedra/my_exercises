@@ -29,6 +29,11 @@ temp = atof(argv[1]);
 restart = atoi(argv[2]);
 
   Input(); //Inizialization
+
+  //equilibration
+  for (int i=0;i<1000;i++) Move(metro);
+
+  //starting simulation
   for(int iblk=1; iblk <= nblk; ++iblk) //Simulation
   {
     Reset(iblk);   //Reset block averages
@@ -122,10 +127,10 @@ else {
 	Readspin.close();
   
 //Evaluate energy etc. of the initial configuration
-  Measure();
+  //Measure();
 
-//Print initial values for the potential energy and virial
-  cout << "Initial energy = " << walker[iu]/(double)nspin << endl;
+//Print initial values for the potential energy 
+  //cout << "Initial energy = " << walker[iu]/(double)nspin << endl;
 }
 
 void Move(int metro)
@@ -239,7 +244,8 @@ void Averages(int iblk) //Print results for current block
 
     Heat.open("output.hc.0",ios::app);
     double appo = blk_av[ic]/blk_norm/(double)nspin;
-    double appo2 = nspin*blk_av[iu]*blk_av[iu] / pow(blk_norm*(double)nspin,2) ;//nspin*stima_u*stima_u;
+    double appo2 = nspin*stima_u*stima_u; 
+    //nspin*blk_av[iu]*blk_av[iu] / pow(blk_norm*(double)nspin,2)
     stima_c = (appo-appo2)*beta*beta; //Heat Capacity
     glob_av[ic]  += stima_c;
     glob_av2[ic] += stima_c*stima_c;
