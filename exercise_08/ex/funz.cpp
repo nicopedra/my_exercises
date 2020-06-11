@@ -222,17 +222,21 @@ double H_psi_T(double x,double mu,double sigma) {
 
 void Metropolis(Random& rnd,int iterations,int N,double delta) {
 
- int L = iterations/N;	
+ int L = iterations/N;
+ //to store sampled points 
  mat campionamenti; campionamenti.zeros(iterations,1);
+ //store H istantaneous values
  vector<double> H;
+ //mean in each block
  vector<double> H_mean;
  fstream fd;
- double mu0 = sqrt(5./4.); //mi servono punti iniziali possibili
- double sigma0 = 1;
+ double mu0 = sqrt(5./4.); //minimo potenziale
+ double sigma0 = 1;//larghezza iniziale
  double mu,sigma;
  double error;
- double init_x=0;// il punto è scegliere un punto intelligente per iniziare la simulazione
+ double init_x=0;//punto iniziale
  double new_x;
+ //per data blocking
  vector<double> data(2);
  vector<double> parameters(2);
  double H_new;
@@ -240,9 +244,6 @@ void Metropolis(Random& rnd,int iterations,int N,double delta) {
 
  H_old = H_psi_T(init_x,mu0,sigma0);
  parameters[0] = mu0; parameters[1] = sigma0;
-
- //guardando la figura in python per il GS so dove guardare per il valore di mu e sigma
- //mu sicuramente tra 0.5 e 1.. sigma sicuramente non meno di 0.3 e non più di 1
 
  //ricerca del minimo di <H(mu,sigma)>_psitrial
  for (int l=0;l<20;l++){
@@ -256,6 +257,7 @@ void Metropolis(Random& rnd,int iterations,int N,double delta) {
 		attempted =0; accepted =0;
 		init_x = 0;
 		//Metropolis
+
 		//equlibration
 		for (uword i=0;i<1000;i++) {
  			new_x = rnd.Rannyu1D_center(init_x,delta);
@@ -265,6 +267,8 @@ void Metropolis(Random& rnd,int iterations,int N,double delta) {
 				}
 			attempted++;
 		}
+		//end equilibration
+
  		for (uword i=0;i<iterations;i++) {
  			new_x = rnd.Rannyu1D_center(init_x,delta);
  				if (rnd.Rannyu() < A_psi_T(init_x,new_x,mu,sigma)) { 
@@ -316,6 +320,8 @@ cout << "mu = " << parameters[0] << " , sigma = " << parameters[1] << endl;
 				}
 			attempted++;
 		}
+		//end equilibration
+
  		for (uword i=0;i<iterations;i++) {
  			new_x = rnd.Rannyu1D_center(init_x,delta);
  				if (rnd.Rannyu() < A_psi_T(init_x,new_x,mu,sigma)) { 
