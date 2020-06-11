@@ -168,6 +168,7 @@ double psi_210_square (vec cart_coord) {
 
 };
 
+//acceptance probability psi100
 double A_psi100 (vec init_x, vec new_x) {
         double appo1 = psi_100_square(new_x);
 	double appo2 = psi_100_square(init_x);
@@ -175,6 +176,7 @@ double A_psi100 (vec init_x, vec new_x) {
 
 };
 
+//acceptance probability psi210
 double A_psi210 (vec init_x, vec new_x) {
         double appo1 = psi_210_square(new_x);
 	double appo2 = psi_210_square(init_x);
@@ -199,7 +201,13 @@ void Metropolis_uniform(Random& rnd,int iterations,int N,double delta) {
  vec init_x = {0.,0.,0.};
  //to store the new move
  vec new_x;
- 
+
+ //equilibration
+ for (uword i=0;i<1000;i++) {
+	new_x = rnd.Rannyu3D_center(init_x,delta);
+	if (rnd.Rannyu()<=A_psi100(init_x,new_x)) init_x = new_x;
+ }
+
  for (uword i=0;i<iterations;i++) { //cycle over all iterations
 	//saving coordinates
 	campionamenti.row(i) = init_x.t();
@@ -230,6 +238,12 @@ void Metropolis_uniform(Random& rnd,int iterations,int N,double delta) {
  campionamenti.zeros(iterations,3);
  //new initial point for psi_210
  init_x = {a_0/2.,a_0/2.,a_0/2.};
+
+ //equilibration
+ for (uword i=0;i<1000;i++) {
+	new_x = rnd.Rannyu3D_center(init_x,delta);
+	if (rnd.Rannyu()<=A_psi210(init_x,new_x)) init_x = new_x;
+ }
 
  //Metropolis sampling
  for (uword i=0;i<iterations;i++) {
@@ -268,7 +282,13 @@ void Metropolis_gauss(Random& rnd,int iterations,int N,double delta) {
 
  vec init_x ={0.,0.,0.};
  vec new_x;
- 
+
+ //equilibration
+ for (uword i=0;i<1000;i++) {
+	new_x = rnd.Rannyu3D_gauss(init_x,delta);
+	if (rnd.Rannyu()<=A_psi100(init_x,new_x)) init_x = new_x;
+ }
+
  for (uword i=0;i<iterations;i++) {
         campionamenti.row(i) = init_x.t();
         new_x = rnd.Rannyu3D_gauss(init_x,delta);
@@ -293,6 +313,12 @@ void Metropolis_gauss(Random& rnd,int iterations,int N,double delta) {
  r_mean.clear();
  campionamenti.zeros(iterations,3);
  init_x = {a_0/2.,a_0/2.,a_0/2.};
+
+ //equilibration
+ for (uword i=0;i<1000;i++) {
+	new_x = rnd.Rannyu3D_gauss(init_x,delta);
+	if (rnd.Rannyu()<=A_psi210(init_x,new_x)) init_x = new_x;
+ }
 
  for (uword i=0;i<iterations;i++) {
         campionamenti.row(i) = init_x.t();
