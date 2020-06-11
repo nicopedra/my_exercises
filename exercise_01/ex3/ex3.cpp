@@ -11,6 +11,7 @@ using namespace std;
  int n=100;//number of blocks
  double L_needle=0.5,dist_lines=1.;
  //doing buffon experiment with a needle
+ //it returns a vector conteining the result per-each block
  vector<double> stuzzicadente = esperimento_Buffon(rnd,n,M,dist_lines,L_needle);
 
  //blocking method

@@ -121,12 +121,14 @@ void print_vector(vector<double> v, string file) {
 	fd.close();
 };
 
+//evaluate chi-square
 template <typename T>
 double chiquadro(vector<T> observed, double expected) {
 	vector<double> chi_i; 
 	for (auto el : observed) chi_i.push_back((el-expected)*(el-expected)/expected);
 	return accumulate(chi_i.begin(),chi_i.end(),0.);
 };
+
 
 void data_blocking(int N,vector<double> simulation_value, double real_value, string file) {
  
