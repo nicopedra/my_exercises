@@ -1,4 +1,4 @@
-nella cartella ex1 c'è il codice relativa all'esercizio 3.01 della terza esercitazione.  
+nella cartella ex1 c'è il codice relativo all'esercizio 3.01 della terza esercitazione.  
   
 la cartella è organizzata nel seguente modo:  
 1. makefile
