@@ -3,7 +3,7 @@
 using namespace std;
 using namespace arma;
 
-#define square
+//#define square
 
  int main (int argc, char *argv[]) {
 //###########################################################
