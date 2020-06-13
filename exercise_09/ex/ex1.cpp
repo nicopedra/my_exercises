@@ -7,7 +7,7 @@ using namespace arma;
 
  int main (int argc, char *argv[]) {
 //###########################################################
- Random rnd = random_initialization(2);
+ Random rnd = random_initialization(2); // con 5 e 500'000 step trovo persino un minimo più minimo per circ
 //###########################################################
 
 //################################# EXERCISE 1 ##################

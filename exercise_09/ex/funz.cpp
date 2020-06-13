@@ -340,7 +340,6 @@ Random random_initialization(int lettura = 1) {
 
 };
 
-//per ora raggio 1, poi si potra modificare
 void initialize_circon(Random& rnd,int cities) {
         double angle;
 	complex<double> z;

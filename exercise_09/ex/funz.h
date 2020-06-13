@@ -81,26 +81,29 @@ public:
   vector<int> get_chromo(int i) {return chromosomes[i];}
   int get_gene_chromo(int j,int i) {return chromosomes[i][j];}
   void fill_initial_population();//popolazione iniziale
-  void selection(Random&);
-  void order_chrom();
-  void crossover(Random&);
-  void mutation(Random&,vector<int>&);
+  void selection(Random&);//algoritmo di selezione
+  void order_chrom();//ordina la popolazione in base alla cost
+  void crossover(Random&);//algoritmo di crossover
+  void mutation(Random&,vector<int>&);//mutazione
   void print_population(); 
   double mean_cost();
   void print_average_path(); 
   void print_best_path();
-  void update();
+  void update();//update population 
  };
 
+//check permutation
 void check_function (vector<int>);
 
+//for cost
 template <class InputIt1,class T>
 T square_norm (InputIt1,InputIt1,T); 
 
 template <typename T>
 void shift_vector(vector<T>&,int,int); 
 
-double cost_function(vector<int>); 
+double cost_function(vector<int>);
+
 void picture_path(vector<int>,string);
 
 struct {
