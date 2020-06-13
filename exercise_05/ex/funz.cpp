@@ -289,6 +289,7 @@ void Metropolis_gauss(Random& rnd,int iterations,int N,double delta) {
 	if (rnd.Rannyu()<=A_psi100(init_x,new_x)) init_x = new_x;
  }
 
+ //same as above
  for (uword i=0;i<iterations;i++) {
         campionamenti.row(i) = init_x.t();
         new_x = rnd.Rannyu3D_gauss(init_x,delta);
