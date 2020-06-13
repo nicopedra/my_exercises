@@ -194,8 +194,6 @@ double uniform_I(Random& rnd, int M,double lint=1.) {
  return sum/M*lint;
 };
 
-//devo pensare a una funzione che può assomigliare a cos(x)
-//nell'intervallo che sto guardando. va bene tipo PI/2*(1-x)
 vector<double> importance_sampling(Random& rnd,int M,int n, double lint=1.) {
 
 	vector<double> integral;
@@ -208,6 +206,7 @@ return integral;
 };
 
 //calculate with importance sampling method the integral of pi/2*cos(pi/2x) in [0,lint]
+//I've used a straight line (explain in the notebook)
 double importace_sampling_I(Random& rnd, int M,double lint=1.) {
  	double sum=0;
 	double x;
@@ -283,8 +282,8 @@ vector<double> last_data_from_datablocking(int N,vector<double> simulation_value
 
 void sqrt_variance_RW (Random& rnd,int M,int N,int N_step, string file, int discr_or_cont) {
  
- vector<double> salva_dist;
- int L=M/N;
+ vector<double> salva_dist;//to store distances
+ int L=M/N;//number of throwns in each block
  vector<double> origin(3,0.);//start from the origin
  vector<vector<double>> v(N_step);//matrix with N_step columns, each column contains M different values of
  				  //the single step calculated for each simulation
