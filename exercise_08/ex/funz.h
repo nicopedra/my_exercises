@@ -70,6 +70,7 @@ double D2_psi_T(double,double,double);//second derivative of psi_trial
 double H_psi_T(double,double,double);// (H | psi > )/ psi 
 
 void Metropolis(Random&,int,int,double);
+//random generator,iterations for Metropolis, blocks, delta for Metropolis
 
 #endif 
 

@@ -230,13 +230,13 @@ void Metropolis(Random& rnd,int iterations,int N,double delta) {
  //mean in each block
  vector<double> H_mean;
  fstream fd;
- double mu0 = sqrt(5./4.); //minimo potenziale
- double sigma0 = 1;//larghezza iniziale
+ double mu0 = sqrt(5./4.); //potential minimum
+ double sigma0 = 1;//initial sigma
  double mu,sigma;
  double error;
- double init_x=0;//punto iniziale
+ double init_x=0;//initial point
  double new_x;
- //per data blocking
+ //data blocking
  vector<double> data(2);
  vector<double> parameters(2);
  double H_new;
@@ -245,7 +245,7 @@ void Metropolis(Random& rnd,int iterations,int N,double delta) {
  H_old = H_psi_T(init_x,mu0,sigma0);
  parameters[0] = mu0; parameters[1] = sigma0;
 
- //ricerca del minimo di <H(mu,sigma)>_psitrial
+ //search for min of <H(mu,sigma)>_psitrial
  for (int l=0;l<20;l++){
 
 	if (l % 5 == 0) cout << "ricerca numero " << l*20 << endl;
@@ -279,18 +279,18 @@ void Metropolis(Random& rnd,int iterations,int N,double delta) {
 			H.push_back(H_psi_T(init_x,mu,sigma));
 
  		}
-		//fine metropolis
+		//end metropolis
 		//data blocking
  		for (uword i=0;i<N;i++) 
 			 H_mean.push_back( mean(H, (i+1)*L, i*L )); 
  		data = last_data_from_datablocking(N,H_mean);
 		H_new = data[0];
-		if(H_new < H_old) {//ricerca del minimo e salvo i parametri 
+		if(H_new < H_old) {//store min and save parameters
 			H_old = H_new;
 			error = data[1];
 			parameters[0] = mu; parameters[1] = sigma;
 		}
-		//ripulisco per ricominciare
+		//clear contents
 		H.clear();
 		H_mean.clear();
 	}
@@ -333,7 +333,9 @@ cout << "mu = " << parameters[0] << " , sigma = " << parameters[1] << endl;
 			H.push_back(H_psi_T(init_x,mu,sigma));
 
  		}
+		//end Metropolis
 		cout << " rate accepted " << accepted/double(attempted) << endl;
+		//data blocking
  		for (uword i=0;i<N;i++) 
 			 H_mean.push_back( mean(H, (i+1)*L, i*L )); 
  		data_blocking(N,H_mean,0,"HT.txt");
@@ -345,6 +347,7 @@ cout << "mu = " << parameters[0] << " , sigma = " << parameters[1] << endl;
 		cout << "-------------------------------------------------------------" << endl;
 		cout << endl;
  
+ //save all 
  print_vector(H,"HTall.txt");
  campionamenti.row(iterations-1) = init_x;
  campionamenti = campionamenti;
