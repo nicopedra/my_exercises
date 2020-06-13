@@ -41,7 +41,7 @@ int main(int argc, char** argv){
     }
     Averages(iblk);   //Print results for current block
   }
-  system("make copy");
+  system("make copy");//save start configuration in config.0
   ConfFinal(); //Write final configuration
 
   return 0;

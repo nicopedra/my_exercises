@@ -11,3 +11,5 @@ clean :
 	rm *.o Monte_Carlo_NVT.exe
 copy : 
 	cp config.final config.0
+oldcopy:
+	cp config.0 config.final
