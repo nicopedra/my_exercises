@@ -136,7 +136,7 @@ else {
 void Move(int metro)
 {
   int o;
-  double p, energy_old, energy_new, sm;
+  double p, energy_old, energy_new, sm, energy;
   double r,rr;
 
   for(int i=0; i<nspin; ++i)
@@ -155,11 +155,18 @@ void Move(int metro)
 	    		accepted++;}
     }
     else //Gibbs sampling
-    {	
-	   p = 1. / (1+exp( beta*( energy_new-energy_old ) ) );
-           attempted++;	
-	   if (rnd.Rannyu()<=p){ s[o]=-s[o];
-		                 accepted++;}
+    {
+    	   energy = 2*Boltzmann(1,o);//metto 1 perchè mi interessa l'energia dei primi vicini
+	   //p = 1. / (1+exp( beta*( energy_new-energy_old ) ) );
+	   p = 1. / (1+exp( beta*( energy ) ) );
+	   attempted++;
+   	   accepted++;	   
+	   //first wrong way
+	   /*if (rnd.Rannyu()<=p){ s[o]=-s[o];
+		                 accepted++;}*/
+	   if ( rnd.Rannyu()< p) s[o]=1;
+	   else s[o] = -1; 
+
     }
   }
 }
